@@ -44,7 +44,8 @@ use ieee.numeric_std.all;
 --! The memory is byte-addressed by PC.
 --! Data (8 bits) from memory is written to MBR.
 --! MBR contents can be accessed (via the B bus) in two ways: sign-extended or
---! 0-extended.
+--! 0-extended on 32 bits. The 8 bit content is always on the mbr_reg_out out,
+--! regardless of other enables.
 entity memory_interface is
   port (
     --! Clock
@@ -85,6 +86,8 @@ entity memory_interface is
     pc_write_en     : in    std_logic;
     --! Input to MBR register from memory
     mbr_mem_in      : in    std_logic_vector(7 downto 0);
+    --! Output from MBR register to outside the datapath
+    mbr_reg_out     : out   std_logic_vector(7 downto 0);
     --! Output from MBR register to B bus (0-extended)
     mbr_8_data_out  : out   std_logic_vector(31 downto 0);
     --! Output from MBR register to B bus (sign-extended)
@@ -161,6 +164,8 @@ begin  -- architecture behavioral
 
   pc_mem_out  <= pc_data when mem_fetch = '1'  else (others => 'Z');
   pc_data_out <= pc_data when pc_read_en = '1' else (others => 'Z');
+
+  mbr_reg_out <= mbr_data;
 
   mbr_8_t <= x"000000" & mbr_data;
 

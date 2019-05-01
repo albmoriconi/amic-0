@@ -91,6 +91,6 @@ begin  -- architecture behavioral
     assert data_out = high_impedance report "Read en = 0 - Error" severity error;
 
     wait;
-  end process WaveGen_Proc;
+  end process wavegen_proc;
 
 end architecture behavioral;

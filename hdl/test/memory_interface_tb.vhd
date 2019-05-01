@@ -56,6 +56,7 @@ architecture behavioral of memory_interface_tb is
   signal pc_read_en      : std_logic;
   signal pc_write_en     : std_logic;
   signal mbr_mem_in      : std_logic_vector(7 downto 0);
+  signal mbr_reg_out     : std_logic_vector(7 downto 0);
   signal mbr_8_data_out  : std_logic_vector(31 downto 0);
   signal mbr_32_data_out : std_logic_vector(31 downto 0);
   signal mbr_8_read_en   : std_logic;
@@ -85,6 +86,7 @@ begin  -- architecture behavioral
       pc_read_en      => pc_read_en,
       pc_write_en     => pc_write_en,
       mbr_mem_in      => mbr_mem_in,
+      mbr_reg_out     => mbr_reg_out,
       mbr_8_data_out  => mbr_8_data_out,
       mbr_32_data_out => mbr_32_data_out,
       mbr_8_read_en   => mbr_8_read_en,
@@ -124,6 +126,7 @@ begin  -- architecture behavioral
     assert mdr_data_out = high_impedance report "Reset - mdr_data_out error" severity error;
     assert pc_data_out = high_impedance report "Reset - pc_data_out error" severity error;
     assert pc_mem_out = high_impedance report "Reset - pc_mem_out error" severity error;
+    assert mbr_reg_out = x"00" report "Reset - mbr_reg_out error" severity error;
     assert mbr_8_data_out = high_impedance report "Reset - mbr_8_data_out error" severity error;
     assert mbr_32_data_out = high_impedance report "Reset - mbr_32_data_out error" severity error;
 
@@ -135,11 +138,12 @@ begin  -- architecture behavioral
     mem_read      <= '1';
     wait for 10 ns;
     assert mar_mem_out = x"ABCDABCD" report "Read - mar_mem_out error" severity error;
-    assert mdr_data_out = x"CAFECAFE" report "Reset - mdr_data_out error" severity error;
-    assert pc_data_out = high_impedance report "Reset - pc_data_out error" severity error;
-    assert pc_mem_out = high_impedance report "Reset - pc_mem_out error" severity error;
-    assert mbr_8_data_out = high_impedance report "Reset - mbr_8_data_out error" severity error;
-    assert mbr_32_data_out = high_impedance report "Reset - mbr_32_data_out error" severity error;
+    assert mdr_data_out = x"CAFECAFE" report "Read - mdr_data_out error" severity error;
+    assert pc_data_out = high_impedance report "Read - pc_data_out error" severity error;
+    assert pc_mem_out = high_impedance report "Read - pc_mem_out error" severity error;
+    assert mbr_reg_out = x"00" report "Read - mbr_reg_out error" severity error;
+    assert mbr_8_data_out = high_impedance report "Read - mbr_8_data_out error" severity error;
+    assert mbr_32_data_out = high_impedance report "Read - mbr_32_data_out error" severity error;
 
     -- Read cleanup
     mdr_mem_inout <= high_impedance;
@@ -158,6 +162,7 @@ begin  -- architecture behavioral
     assert mdr_mem_inout = x"BAD4BAD4" report "Write - mdr_mem_inout error" severity error;
     assert pc_data_out = high_impedance report "Write - pc_data_out error" severity error;
     assert pc_mem_out = high_impedance report "Write - pc_mem_out error" severity error;
+    assert mbr_reg_out = x"00" report "Write - mbr_reg_out error" severity error;
     assert mbr_8_data_out = high_impedance report "Write - mbr_8_data_out error" severity error;
     assert mbr_32_data_out = high_impedance report "Write - mbr_32_data_out error" severity error;
 
@@ -178,6 +183,7 @@ begin  -- architecture behavioral
     assert mdr_data_out = high_impedance report "Fetch - mdr_data_out error" severity error;
     assert pc_data_out = high_impedance report "Fetch - pc_data_out error" severity error;
     assert pc_mem_out = x"12345678" report "Fetch - pc_mem_out error" severity error;
+    assert mbr_reg_out = x"A4" report "Fetch - mbr_reg_out error" severity error;
     assert mbr_8_data_out = x"000000A4" report "Fetch - mbr_8_data_out error" severity error;
     assert mbr_32_data_out = x"FFFFFFA4" report "Fetch - mbr_32_data_out error" severity error;
 
@@ -190,6 +196,6 @@ begin  -- architecture behavioral
     mem_fetch      <= '0';
 
     wait;
-  end process WaveGen_Proc;
+  end process wavegen_proc;
 
 end architecture behavioral;

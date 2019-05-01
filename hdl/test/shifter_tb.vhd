@@ -79,6 +79,6 @@ begin  -- architecture behavioral
     assert shifter_out = x"D5E6D5E6" report "Shift right in(31) = 1 - Error" severity error;
 
     wait;
-  end process WaveGen_Proc;
+  end process wavegen_proc;
 
 end architecture behavioral;
