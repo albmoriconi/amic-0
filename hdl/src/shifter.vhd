@@ -26,6 +26,7 @@ use ieee.numeric_std.all;
 
 --! Shifter unit for the ALU output
 
+--! # Inputs
 --! The operation of the shifter is controlled by the 2 bits shifter_ctrl:
 --!
 --! SLL8 | SRA1
@@ -35,6 +36,8 @@ use ieee.numeric_std.all;
 --! When SLL8 is high, the input is shifted left 8 bits and the 8 LSBs are zero
 --! filled; when SRA1 is high, the input is shifter right 1 bit and the MSB is
 --! sign extended.
+--!
+--! # Outputs
 --! When both SLL8 and SRA1 are low, the input is presented unmodified to the
 --! output; the result is unspecified if both SLL8 and SRA1 are high at the
 --! same time and it should not be considered valid.

@@ -26,17 +26,26 @@ use ieee.numeric_std.all;
 
 --! Basic register for the processor register file
 
+--! # Inputs
 --! The register stores data on the data_in input on clock rising edge if
 --! write_en is high.
---! Output is register content if read_en is high, otherwise it's high impedance.
 --! Reset is asynchronous.
+--!
+--! # Outputs
+--! Output is register content if read_en is high, otherwise it's high impedance.
 entity basic_register is
   port (
+    --! Clock
     clk      : in  std_logic;
+    --! Asyncrhonous active-high reset
     reset    : in  std_logic;
+    --! Input to the register
     data_in  : in  std_logic_vector(31 downto 0);
+    --! When high register output is connected, otherwise it's high impedance
     read_en  : in  std_logic;
+    --! When high input is written on clock rising edge
     write_en : in  std_logic;
+    --! Register output
     data_out : out std_logic_vector(31 downto 0)
     );
 end entity basic_register;
