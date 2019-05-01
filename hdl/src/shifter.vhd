@@ -49,6 +49,7 @@ entity shifter is
     );
 end entity shifter;
 
+--! Dataflow architecture for the shifter
 architecture dataflow of shifter is
 
   -- Subtypes
