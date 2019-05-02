@@ -5,7 +5,7 @@ TB_DIR = test
 
 .PHONY: all test_alu test_shifter test_basic_register test_memory_interface clean
 
-all: alu_tb shifter_tb basic_register_tb memory_interface_tb
+all: alu_tb shifter_tb basic_register_tb memory_interface_tb datapath.o
 
 alu.o: $(SRC_DIR)/alu.vhd
 	$(HDLC) -a $(SRC_DIR)/alu.vhd
@@ -18,6 +18,9 @@ basic_register.o: $(SRC_DIR)/basic_register.vhd
 
 memory_interface.o: $(SRC_DIR)/memory_interface.vhd
 	$(HDLC) -a $(SRC_DIR)/memory_interface.vhd
+
+datapath.o: $(SRC_DIR)/datapath.vhd alu.o shifter.o basic_register.o memory_interface.o
+	$(HDLC) -a $(SRC_DIR)/datapath.vhd
 
 alu_tb.o: $(TB_DIR)/alu_tb.vhd alu.o
 	$(HDLC) -a $(TB_DIR)/alu_tb.vhd

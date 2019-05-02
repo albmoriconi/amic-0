@@ -22,16 +22,12 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
 
 --! Basic register for the processor register file
 
---! # Inputs
 --! The register stores data on the data_in input on clock rising edge if
 --! write_en is high.
 --! Reset is asynchronous.
---!
---! # Outputs
 --! Output is register content if read_en is high, otherwise it's high impedance.
 entity basic_register is
   port (
