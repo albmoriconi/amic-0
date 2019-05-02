@@ -103,12 +103,13 @@ end entity memory_interface;
 architecture behavioral of memory_interface is
 
   -- Signals
-  signal mar_data : std_logic_vector(31 downto 0);
-  signal mdr_data : std_logic_vector(31 downto 0);
-  signal pc_data  : std_logic_vector(31 downto 0);
-  signal mbr_data : std_logic_vector(7 downto 0);
-  signal mbr_8_t  : std_logic_vector(31 downto 0);
-  signal mbr_32_t : std_logic_vector(31 downto 0);
+  signal mar_data     : std_logic_vector(31 downto 0);
+  signal mar_data_sl2 : std_logic_vector(31 downto 0);
+  signal mdr_data     : std_logic_vector(31 downto 0);
+  signal pc_data      : std_logic_vector(31 downto 0);
+  signal mbr_data     : std_logic_vector(7 downto 0);
+  signal mbr_8_t      : std_logic_vector(31 downto 0);
+  signal mbr_32_t     : std_logic_vector(31 downto 0);
 
 begin  -- architecture behavioral
 
@@ -157,7 +158,8 @@ begin  -- architecture behavioral
     end if;
   end process;
 
-  mar_mem_out <= mar_data when mem_read = '1' or mem_write = '1' else (others => 'Z');
+  mar_data_sl2 <= mar_data(29 downto 0) & "00";
+  mar_mem_out  <= mar_data_sl2 when mem_read = '1' or mem_write = '1' else (others => 'Z');
 
   mdr_mem_inout <= mdr_data when mem_write = '1'   else (others => 'Z');
   mdr_data_out  <= mdr_data when mdr_read_en = '1' else (others => 'Z');
@@ -165,14 +167,11 @@ begin  -- architecture behavioral
   pc_mem_out  <= pc_data when mem_fetch = '1'  else (others => 'Z');
   pc_data_out <= pc_data when pc_read_en = '1' else (others => 'Z');
 
-  mbr_reg_out <= mbr_data;
-
-  mbr_8_t <= x"000000" & mbr_data;
-
+  mbr_reg_out           <= mbr_data;
+  mbr_8_t               <= x"000000" & mbr_data;
   mbr_32_t(7 downto 0)  <= mbr_data;
-  mbr_32_t(31 downto 8) <= (others => mbr_data(7));
-
-  mbr_8_data_out  <= mbr_8_t  when mbr_8_read_en = '1' else (others => 'Z');
-  mbr_32_data_out <= mbr_32_t when mbr_8_read_en = '1' else (others => 'Z');
+  mbr_32_t(31 downto 8) <= (others                                        => mbr_data(7));
+  mbr_8_data_out        <= mbr_8_t  when mbr_8_read_en = '1' else (others => 'Z');
+  mbr_32_data_out       <= mbr_32_t when mbr_8_read_en = '1' else (others => 'Z');
 
 end architecture behavioral;

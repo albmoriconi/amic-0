@@ -137,7 +137,7 @@ begin  -- architecture behavioral
     mdr_read_en   <= '1';
     mem_read      <= '1';
     wait for 10 ns;
-    assert mar_mem_out = x"ABCDABCD" report "Read - mar_mem_out error" severity error;
+    assert mar_mem_out = x"AF36AF34" report "Read - mar_mem_out error" severity error;
     assert mdr_data_out = x"CAFECAFE" report "Read - mdr_data_out error" severity error;
     assert pc_data_out = high_impedance report "Read - pc_data_out error" severity error;
     assert pc_mem_out = high_impedance report "Read - pc_mem_out error" severity error;
@@ -157,7 +157,7 @@ begin  -- architecture behavioral
     mdr_write_en <= '1';
     mem_write    <= '1';
     wait for 10 ns;
-    assert mar_mem_out = x"ABCDABCD" report "Write - mar_mem_out error" severity error;
+    assert mar_mem_out = x"AF36AF34" report "Write - mar_mem_out error" severity error;
     assert mdr_data_out = high_impedance report "Write - mdr_data_out error" severity error;
     assert mdr_mem_inout = x"BAD4BAD4" report "Write - mdr_mem_inout error" severity error;
     assert pc_data_out = high_impedance report "Write - pc_data_out error" severity error;
