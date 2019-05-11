@@ -3,14 +3,16 @@
 import sys
 
 def print_help_text():
-    print('''Usage: words_to_hdl.py WORDS_FILE HDL_FILE HDL_VECTOR_NAME
+    print('''Usage: words_to_hdl.py WORDS_FILE HDL_FILE
+Output words are read from WORDS_FILE and written in HDL_FILE as entries
+of a VHDL constant array of vectors.
 Output is written between tags --BEGIN_WORDS_ENTRY and --END_WORDS_ENTRY.
 Tags have to appear alone on a line.
 Existing text between tags is deleted.''')
 
 if __name__ == '__main__':
     # TODO Implement argument parsing
-    if (len(sys.argv) != 4):
+    if (len(sys.argv) != 3):
         print_help_text()
         exit()
 
@@ -29,9 +31,10 @@ if __name__ == '__main__':
             if line.strip() == '--BEGIN_WORDS_ENTRY':
                 in_tags = True
                 for word in words:
-                    word_entry = sys.argv[3] + '(' + str(idx) + ') <= "' + word.strip() + '";\n'
+                    word_entry = str(idx) + ' => "' + word.strip() + '",\n'
                     idx += 1
                     hdl_f.write(word_entry)
+                hdl_f.write("others => (others => '0')\n")
             elif line.strip() == '--END_WORDS_ENTRY':
                 in_tags = False
                 hdl_f.write(line)
