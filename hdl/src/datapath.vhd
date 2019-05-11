@@ -42,7 +42,7 @@ use ieee.std_logic_1164.all;
 --! # Outputs
 --!
 --! The datapath provides the content of the MBR register and the N/Z ALU flags
---! to the control unit.
+--! to the control unit, the memory address to the outer world.
 entity datapath is
   port (
     --! Clock
