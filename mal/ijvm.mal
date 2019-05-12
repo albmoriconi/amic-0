@@ -1,0 +1,174 @@
+# MIC-1 Microprogram
+# Copyright (C) 2019 Alberto Moriconi
+
+        goto mic1_entry
+
+main:
+        PC = PC + 1; fetch; goto (MBR)
+
+nop = 0x00:
+        goto main
+
+iadd = 0x65:
+        MAR = SP = SP - 1; rd
+        H = TOS
+        MDR = TOS = MDR + H; wr; goto main
+
+isub = 0x5C:
+        MAR = SP = SP - 1; rd
+        H = TOS
+        MDR = TOS = MDR - H; wr; goto main
+
+iand = 0x7E:
+        MAR = SP = SP - 1; rd
+        H = TOS
+        MDR = TOS = MDR AND H; wr; goto main
+
+ior = 0xB6:
+        MAR = SP = SP - 1; rd
+        H = TOS
+        MDR = TOS = MDR OR H; wr; goto main
+
+dup = 0x57:
+        MAR = SP = SP + 1
+        MDR = TOS; wr; goto main
+
+pop = 0x59:
+        MAR = SP = SP - 1; rd
+        empty
+        TOS = MDR; goto main
+
+swap = 0x5F:
+        MAR = SP - 1; rd
+        MAR = SP
+        H = MDR; wr
+        MDR = TOS
+        MAR = SP - 1; wr
+        TOS = H; goto main
+
+bipush = 0x10:
+        SP = MAR = SP + 1
+        PC = PC + 1; fetch
+        MDR = TOS = MBR; wr; goto main
+
+iload = 0x15:
+        H = LV
+        MAR = MBRU + H; rd
+iload_cont:
+        MAR = SP = SP + 1
+        PC = PC + 1; fetch; wr
+        TOS = MDR; goto main
+
+istore = 0x36:
+        H = LV
+        MAR = MBRU + H
+istore_cont:
+        MDR = TOS; wr
+        SP = MAR = SP - 1; rd
+        PC = PC + 1; fetch
+        TOS = MDR; goto main
+
+wide = 0xCF:
+        PC = PC + 1; fetch; goto (MBR OR 0x100)
+
+wide_iload = 0x115:
+        PC = PC + 1; fetch
+        H = MBRU << 8
+        H = MBRU OR H
+        MAR = LV + H; rd; goto iload_cont
+
+wide_istore = 0x136:
+        PC = PC + 1; fetch
+        H = MBRU << 8
+        H = MBRU OR H
+        MAR = LV + H; goto istore_cont
+
+ldc_w = 0x20:
+        PC = PC + 1; fetch
+        H = MBRU << 8
+        H = MBRU OR H
+        MAR = H + CPP; rd; goto iload_cont
+
+iinc = 0x84:
+        H = LV
+        MAR = MBRU + H; rd
+        PC = PC + 1; fetch
+        H = MDR
+        PC = PC + 1; fetch
+        MDR = MBR + H; wr; goto main
+
+ijvm_goto = 0xA7:
+        OPC = PC - 1
+goto_cont:
+        PC = PC + 1; fetch
+        H = MBR << 8
+        H = MBRU OR H
+        PC = OPC + H; fetch
+        goto main
+
+iflt = 0x9D:
+        MAR = SP = SP - 1; rd
+        OPC = TOS
+        TOS = MDR
+        N = OPC; if (N) goto T; else goto F
+
+ifeq = 0x99:
+        MAR = SP = SP - 1; rd
+        OPC = TOS
+        TOS = MDR
+        Z = OPC; if (Z) goto T; else goto F
+
+if_icmpeq = 0xA1:
+        MAR = SP = SP - 1; rd
+        MAR = SP = SP - 1
+        H = MDR; rd
+        OPC = TOS
+        TOS = MDR
+        Z = OPC - H; if (Z) goto T; else goto F
+
+T:
+        OPC = PC - 1; fetch; goto goto_cont
+
+F:
+        PC = PC + 1
+        PC = PC + 1; fetch
+        goto main
+
+invokevirtual = 0xB9:
+        PC = PC + 1; fetch
+        H = MBRU << 8
+        H = MBRU OR  H
+mic1_entry:
+        MAR = CPP + H; rd
+        OPC = PC + 1
+        PC = MDR; fetch
+        PC = PC + 1; fetch
+        H = MBRU << 8
+        H = MBRU OR H
+        PC = PC + 1; fetch
+        TOS = SP - H
+        TOS = MAR = TOS + 1
+        PC = PC + 1; fetch
+        H = MBRU << 8
+        H = MBRU OR H
+        MDR = SP + H + 1; wr
+        MAR = SP = MDR
+        MDR = OPC; wr
+        MAR = SP = SP + 1
+        MDR = LV; wr
+        PC = PC + 1; fetch
+        LV = TOS; goto main
+
+ireturn = 0xAD:
+        MAR = SP = LV; rd
+        empty
+        LV = MAR = MDR; rd
+        MAR = LV + 1
+        PC = MDR; rd; fetch
+        MAR = SP
+        LV = MDR
+        MDR = TOS; wr
+        Z = PC - 1; if (Z) goto mic1_exit; else goto main
+
+mic1_exit:
+        halt
