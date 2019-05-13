@@ -33,7 +33,6 @@ architecture behavioral of memory_interface_tb is
   constant high_impedance : std_logic_vector(31 downto 0) :=
     "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 
-
   -- Clock
   signal clk : std_logic := '1';
 
@@ -61,6 +60,9 @@ architecture behavioral of memory_interface_tb is
   signal mbr_32_data_out : std_logic_vector(31 downto 0);
   signal mbr_8_read_en   : std_logic;
   signal mbr_32_read_en  : std_logic;
+
+  -- Variables
+  shared variable end_run : boolean := false;
 
 begin  -- architecture behavioral
 
@@ -93,7 +95,15 @@ begin  -- architecture behavioral
       mbr_32_read_en  => mbr_32_read_en);
 
   -- Clock generation
-  clk <= not clk after 5 ns;
+  clk_proc : process
+  begin
+    while end_run = false loop
+      clk <= not clk;
+      wait for 5 ns;
+    end loop;
+
+    wait;
+  end process clk_proc;
 
   -- Waveform generation
   wavegen_proc : process
@@ -195,6 +205,7 @@ begin  -- architecture behavioral
     mbr_32_read_en <= '0';
     mem_fetch      <= '0';
 
+    end_run := true;
     wait;
   end process wavegen_proc;
 

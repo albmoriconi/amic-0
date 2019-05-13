@@ -43,6 +43,9 @@ architecture behavioral of basic_register_tb is
   constant high_impedance : std_logic_vector(31 downto 0) :=
     "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ";
 
+  -- Variables
+  shared variable end_run : boolean := false;
+
 begin  -- architecture behavioral
 
   -- Component instantiation
@@ -56,7 +59,15 @@ begin  -- architecture behavioral
       data_out => data_out);
 
   -- Clock generation
-  clk <= not clk after 5 ns;
+  clk_proc : process
+  begin
+    while end_run = false loop
+      clk <= not clk;
+      wait for 5 ns;
+    end loop;
+
+    wait;
+  end process clk_proc;
 
   -- Waveform generation
   wavegen_proc : process
@@ -90,6 +101,7 @@ begin  -- architecture behavioral
     wait for 2 ns;
     assert data_out = high_impedance report "Read en = 0 - Error" severity error;
 
+    end_run := true;
     wait;
   end process wavegen_proc;
 
