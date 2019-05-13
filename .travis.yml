@@ -3,9 +3,8 @@ language: minimal
 install:
   - sudo add-apt-repository ppa:pgavin/ghdl -y
   - sudo apt-get update
-  - sudo apt-get install ghdl cmake make -y
+  - sudo apt-get install ghdl cmake -y
 
 script:
-  - mkdir build && cd build
-  - cmake ..
-  - make check
+  - mkdir build && cd build && cmake .. && make check
+

@@ -24,10 +24,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.common_defs.all;
+
 --! Arithmetic logic unit based on MIC-1 ALU
 
---! # Inputs
---!
 --! The ALU operates on 2 operands (A, B); its operation is controlled by the 6
 --! control bits:
 --!
@@ -46,21 +46,19 @@ use ieee.numeric_std.all;
 --! A. The INC bit is used only by the arithmetical sum and has the effect of
 --! adding an LSB to the sum.
 --!
---! # Outputs
---!
---! The ALU result is selected by the (F_0, F_1) bits; the zero flag (Z) is
---! high when all bits of the result are 0; the negative flag (N) is high when
---! the operation is the arithmetical sum and the MSB of the result is 1.
+--! The zero flag (Z) is high when all bits of the result are 0; the negative
+--! flag (N) is high when the operation is the arithmetical sum and the MSB of
+--! the result is 1.
 entity alu is
   port (
     --! ALU control
-    control       : in  std_logic_vector(5 downto 0);
+    control       : in  alu_ctrl_type;
     --! ALU operand A
-    operand_a     : in  std_logic_vector(31 downto 0);
+    operand_a     : in  reg_data_type;
     --! ALU operand B
-    operand_b     : in  std_logic_vector(31 downto 0);
+    operand_b     : in  reg_data_type;
     --! ALU result
-    result        : out std_logic_vector(31 downto 0);
+    result        : out reg_data_type;
     --! Negative flag
     negative_flag : out std_logic;
     --! Zero flag
@@ -71,51 +69,38 @@ end entity alu;
 --! Behavioral architecture for the ALU
 architecture behavioral of alu is
 
-  -- Subtypes
-  subtype alu_data_type is std_logic_vector(31 downto 0);
-  subtype alu_function_type is std_logic_vector(1 downto 0);
-
   -- Aliases
-  alias f     : alu_function_type is control(5 downto 4);
-  alias en_a  : std_logic is control(3);
-  alias en_b  : std_logic is control(2);
-  alias inv_a : std_logic is control(1);
-  alias inc   : std_logic is control(0);
-
-  -- Constants
-  constant f_and   : alu_function_type := "00";
-  constant f_or    : alu_function_type := "01";
-  constant f_not_b : alu_function_type := "10";
-  constant f_sum   : alu_function_type := "11";
+  alias fn : alu_fn_type is control(5 downto 4);
 
   -- Signals
-  signal t_operand_a     : alu_data_type;
-  signal t_operand_a_inv : alu_data_type;
-  signal t_operand_b     : alu_data_type;
-  signal t_and           : alu_data_type;
-  signal t_or            : alu_data_type;
-  signal t_not_b         : alu_data_type;
-  signal t_sum           : alu_data_type;
-  signal t_result        : alu_data_type;
+  signal t_operand_a     : reg_data_type;
+  signal t_operand_a_inv : reg_data_type;
+  signal t_operand_b     : reg_data_type;
   signal t_inc           : std_logic_vector(0 downto 0);
+  signal t_u_sum         : unsigned(reg_data_type'range);
+  signal t_and           : reg_data_type;
+  signal t_or            : reg_data_type;
+  signal t_not_b         : reg_data_type;
+  signal t_sum           : reg_data_type;
+  signal t_result        : reg_data_type;
 
 begin  -- architecture behavioral
 
-  t_operand_a     <= operand_a       when en_a = '1'  else (others => '0');
-  t_operand_a_inv <= not t_operand_a when inv_a = '1' else t_operand_a;
-  t_operand_b     <= operand_b       when en_b = '1'  else (others => '0');
-  t_inc(0)        <= inc;
+  t_operand_a     <= operand_a       when control(alu_ctrl_en_a) = '1'  else (others => '0');
+  t_operand_a_inv <= not t_operand_a when control(alu_ctrl_inv_a) = '1' else t_operand_a;
+  t_operand_b     <= operand_b       when control(alu_ctrl_en_b) = '1'  else (others => '0');
+  t_inc(0)        <= control(alu_ctrl_inc);
+  t_u_sum         <= unsigned(t_operand_a_inv) + unsigned(t_operand_b) + unsigned(t_inc);
 
-  t_and   <= t_operand_a_inv and t_operand_b when f = f_and   else (others => '0');
-  t_or    <= t_operand_a_inv or t_operand_b  when f = f_or    else (others => '0');
-  t_not_b <= not t_operand_b                 when f = f_not_b else (others => '0');
-  t_sum   <= std_logic_vector(unsigned(t_operand_a_inv) + unsigned(t_operand_b) + unsigned(t_inc))
-           when f = f_sum else (others => '0');
+  t_and   <= t_operand_a_inv and t_operand_b when fn = alu_fn_and   else (others => '0');
+  t_or    <= t_operand_a_inv or t_operand_b  when fn = alu_fn_or    else (others => '0');
+  t_not_b <= not t_operand_b                 when fn = alu_fn_not_b else (others => '0');
+  t_sum   <= reg_data_type(t_u_sum)          when fn = alu_fn_sum   else (others => '0');
 
-  with f select t_result <=
-    t_and   when f_and,
-    t_or    when f_or,
-    t_not_b when f_not_b,
+  with fn select t_result <=
+    t_and   when alu_fn_and,
+    t_or    when alu_fn_or,
+    t_not_b when alu_fn_not_b,
     t_sum   when others;
 
   result        <= t_result;
