@@ -1,7 +1,7 @@
 HDLC = ghdl
 
-SRC_DIR = src
-TB_DIR = test
+SRC_DIR = src/main/vhdl
+TB_DIR = src/test/vhdl
 
 .PHONY: all test_alu test_shifter test_basic_register test_memory_interface clean
 
