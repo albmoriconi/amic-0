@@ -5,8 +5,7 @@ project(amic-0)
 cmake_minimum_required(VERSION 2.8)
 
 # Include macros
-include(cmake/macros.cmake)
-include(cmake/test_macros.cmake)
+include(cmake/vhdl_macros.cmake)
 
 # Enable testing
 enable_testing()
@@ -22,10 +21,3 @@ add_custom_target(index ALL COMMAND ghdl -i --workdir=${CMAKE_CURRENT_BINARY_DIR
 
 # Add compile test target
 set(CTEST_OUTPUT_ON_FAILURE 1)
-
-# Find pthread (need for testing)
-# find_package(Threads)
-
-# Create placeholder for wave traces
-# file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/trace/")
-# message("-- Placeholder for trace files created at: ${CMAKE_CURRENT_BINARY_DIR}/trace/")

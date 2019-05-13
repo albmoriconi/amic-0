@@ -1,4 +1,4 @@
-add_sources(alu.vhd
+add_vhdl_sources(alu.vhd
   control_unit.vhd
   processor.vhd
   basic_register.vhd

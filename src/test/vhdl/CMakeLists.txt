@@ -1,4 +1,4 @@
-add_test_sources(
+add_vhdl_test_sources(
   basic_register_tb.vhd
   shifter_tb.vhd
   alu_tb.vhd

@@ -1,1 +1,1 @@
-add_sources_directory(vhdl/)
+add_vhdl_sources_directory(vhdl/)

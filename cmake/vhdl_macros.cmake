@@ -12,8 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Add test sources macro
-macro (add_test_sources)
+# Add VHDL sources
+macro (add_vhdl_sources)
+    file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+    foreach (_src ${ARGN})
+        if (_relPath)
+            list (APPEND VHDL_SOURCES "${CMAKE_SOURCE_DIR}/${_relPath}/${_src}")
+            message("-- Adding VHDL Source: ${CMAKE_SOURCE_DIR}/${_relPath}/${_src}")
+        else()
+            list (APPEND VHDL_SOURCES "${CMAKE_SOURCE_DIR}/${_src}")
+            message("-- Adding VHDL Source: ${CMAKE_SOURCE_DIR}/${_src}")
+        endif()
+    endforeach()
+
+    if (_relPath)
+        # propagate SRCS to parent directory
+        set (VHDL_SOURCES ${VHDL_SOURCES} PARENT_SCOPE)
+    endif()
+endmacro()
+
+# Add VHDL source directory
+macro (add_vhdl_sources_directory)
+  file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+  foreach (_src ${ARGN})
+      add_subdirectory(${_src})
+      # propagate SRCS to parent directory
+      set (VHDL_SOURCES ${VHDL_SOURCES} PARENT_SCOPE)
+  endforeach()
+endmacro()
+
+# Add VHDL test sources
+macro (add_vhdl_test_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     foreach (_src ${ARGN})
         if (_relPath)
@@ -22,13 +51,9 @@ macro (add_test_sources)
             set(FILE_SRC "${_src}")
         endif()
 
-        message("File was ${FILE_SRC}")
-        message("Entity was ${_src}")
         string(REGEX REPLACE ".vhdl?$" "" TEST_NAME "${FILE_SRC}")
         string(REGEX REPLACE "/" "." TEST_NAME "${TEST_NAME}")
         string(REGEX REPLACE ".vhdl?$" "" ENTITY_NAME "${_src}")
-        message("File is ${TEST_NAME}")
-        message("Entity is ${ENTITY_NAME}")
         file (RELATIVE_PATH TEST_REL_PATH "${PROJECT_SOURCE_DIR}/test" "${CMAKE_CURRENT_SOURCE_DIR}")
         set(TRACE_PATH "${CMAKE_BINARY_DIR}/trace/${TEST_REL_PATH}")
         file(MAKE_DIRECTORY ${TRACE_PATH})
@@ -40,7 +65,7 @@ macro (add_test_sources)
 
         add_dependencies(check "${TEST_NAME}")
 
-        # message("-- Adding VHDL Test: ${CMAKE_SOURCE_DIR}/${FILE_SRC}")
+        message("-- Adding VHDL Test: ${CMAKE_SOURCE_DIR}/${FILE_SRC}")
     endforeach()
     if (_relPath)
         # propagate SRCS to parent directory
@@ -48,8 +73,8 @@ macro (add_test_sources)
     endif()
 endmacro()
 
-# Add source directory macro
-macro (add_test_sources_directory)
+# Add VHDL test source directory
+macro (add_vhdl_test_sources_directory)
   file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
   foreach (_src ${ARGN})
       add_subdirectory(${_src})
