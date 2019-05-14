@@ -23,18 +23,19 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+use work.common_defs.all;
+
 --! Empty entity for the ALU testbench
 entity alu_tb is
 end entity alu_tb;
 
-
 architecture behavioral of alu_tb is
 
   -- Component ports
-  signal control       : std_logic_vector(5 downto 0);
-  signal operand_a     : std_logic_vector(31 downto 0);
-  signal operand_b     : std_logic_vector(31 downto 0);
-  signal result        : std_logic_vector(31 downto 0);
+  signal control       : alu_ctrl_type;
+  signal operand_a     : reg_data_type;
+  signal operand_b     : reg_data_type;
+  signal sh_result     : reg_data_type;
   signal negative_flag : std_logic;
   signal zero_flag     : std_logic;
 
@@ -46,129 +47,161 @@ begin  -- architecture behavioral
       control       => control,
       operand_a     => operand_a,
       operand_b     => operand_b,
-      result        => result,
+      sh_result     => sh_result,
       negative_flag => negative_flag,
-      zero_flag     => zero_flag
-      );
+      zero_flag     => zero_flag);
 
   -- Waveform generation
   wavegen_proc : process
   begin
-    -- AND
-    control   <= "001100";
+    -- ALU test
+    -- AND function
+    control   <= "00001100";
     operand_a <= x"CAFECAFE";
     operand_b <= x"BAE07EE7";
     wait for 10 ns;
-    assert result = x"8AE04AE6" report "Logical and - Bad result" severity error;
-    assert negative_flag = '0' report "Logical and - Bad N flag" severity error;
-    assert zero_flag = '0' report "Logical and - Bad Z flag" severity error;
+    assert sh_result = x"8AE04AE6" report "Logical AND - Bad sh_result" severity error;
+    assert negative_flag = '0' report "Logical AND - Bad N flag" severity error;
+    assert zero_flag = '0' report "Logical AND - Bad Z flag" severity error;
 
-    -- OR
-    control <= "011100";
+    -- OR function
+    control <= "00011100";
     wait for 10 ns;
-    assert result = x"FAFEFEFF" report "Logical or - Bad result" severity error;
-    assert negative_flag = '0' report "Logical or - Bad N flag" severity error;
-    assert zero_flag = '0' report "Logical or - Bad Z flag" severity error;
+    assert sh_result = x"FAFEFEFF" report "Logical OR - Bad sh_result" severity error;
+    assert negative_flag = '0' report "Logical OR - Bad N flag" severity error;
+    assert zero_flag = '0' report "Logical OR - Bad Z flag" severity error;
 
-    control <= "011000";
+    control <= "00011000";
     wait for 10 ns;
-    assert result = x"CAFECAFE" report "Operand A - Bad result" severity error;
+    assert sh_result = x"CAFECAFE" report "Operand A - Bad sh_result" severity error;
     assert negative_flag = '0' report "Operand A - Bad N flag" severity error;
     assert zero_flag = '0' report "Operand A - Bad Z flag" severity error;
 
-    control <= "010100";
+    control <= "00010100";
     wait for 10 ns;
-    assert result = x"BAE07EE7" report "Operand B - Bad result" severity error;
+    assert sh_result = x"BAE07EE7" report "Operand B - Bad sh_result" severity error;
     assert negative_flag = '0' report "Operand B - Bad N flag" severity error;
     assert zero_flag = '0' report "Operand B - Bad Z flag" severity error;
 
-    control <= "011010";
+    control <= "00011010";
     wait for 10 ns;
-    assert result = x"35013501" report "Logical not A - Bad result" severity error;
-    assert negative_flag = '0' report "Logical not A - Bad N flag" severity error;
-    assert zero_flag = '0' report "Logical not A - Bad Z flag" severity error;
+    assert sh_result = x"35013501" report "Logical NOT A - Bad sh_result" severity error;
+    assert negative_flag = '0' report "Logical NOT A - Bad N flag" severity error;
+    assert zero_flag = '0' report "Logical NOT A - Bad Z flag" severity error;
 
-    -- NOT B
-    control <= "101100";
+    -- NOT B function
+    control <= "00101100";
     wait for 10 ns;
-    assert result = x"451F8118" report "Logical not B - Bad result" severity error;
-    assert negative_flag = '0' report "Logical not B - Bad N flag" severity error;
-    assert zero_flag = '0' report "Logical not B - Bad Z flag" severity error;
+    assert sh_result = x"451F8118" report "Logical NOT B - Bad sh_result" severity error;
+    assert negative_flag = '0' report "Logical NOT B - Bad N flag" severity error;
+    assert zero_flag = '0' report "Logical NOT B - Bad Z flag" severity error;
 
-    -- SUM
+    -- Sum function
     operand_a <= x"0AFECAFE";
     operand_b <= x"0AE07EE7";
-    control   <= "111100";
+    control   <= "00111100";
     wait for 10 ns;
-    assert result = x"15DF49E5" report "Arithmetic sum 1 - Bad result" severity error;
+    assert sh_result = x"15DF49E5" report "Arithmetic sum 1 - Bad sh_result" severity error;
     assert negative_flag = '0' report "Arithmetic sum 1 - Bad N flag" severity error;
     assert zero_flag = '0' report "Arithmetic sum  1- Bad Z flag" severity error;
     operand_a <= x"CAFECAFE";
     wait for 10 ns;
-    assert result = x"D5DF49E5" report "Arithmetic sum 2 - Bad result" severity error;
+    assert sh_result = x"D5DF49E5" report "Arithmetic sum 2 - Bad sh_result" severity error;
     assert negative_flag = '1' report "Arithmetic sum 2 - Bad N flag" severity error;
     assert zero_flag = '0' report "Arithmetic sum 2 - Bad Z flag" severity error;
 
-    control <= "111101";
+    control <= "00111101";
     wait for 10 ns;
-    assert result = x"D5DF49E6" report "Arithmetic sum + 1 - Bad result" severity error;
+    assert sh_result = x"D5DF49E6" report "Arithmetic sum + 1 - Bad sh_result" severity error;
     assert negative_flag = '1' report "Arithmetic sum + 1  - Bad N flag" severity error;
     assert zero_flag = '0' report "Arithmetic sum + 1 - Bad Z flag" severity error;
 
-    control <= "111001";
+    control <= "00111001";
     wait for 10 ns;
-    assert result = x"CAFECAFF" report "Operand A + 1 - Bad result" severity error;
+    assert sh_result = x"CAFECAFF" report "Operand A + 1 - Bad sh_result" severity error;
     assert negative_flag = '1' report "Operand A + 1 - Bad N flag" severity error;
     assert zero_flag = '0' report "Operand A + 1 - Bad Z flag" severity error;
 
-    control <= "110101";
+    control <= "00110101";
     wait for 10 ns;
-    assert result = x"0AE07EE8" report "Operand B + 1 - Bad result" severity error;
+    assert sh_result = x"0AE07EE8" report "Operand B + 1 - Bad sh_result" severity error;
     assert negative_flag = '0' report "Operand B + 1 - Bad N flag" severity error;
     assert zero_flag = '0' report "Operand B + 1 - Bad Z flag" severity error;
 
     operand_a <= x"0AFECAFE";
-    control   <= "111111";
+    control   <= "00111111";
     wait for 10 ns;
-    assert result = x"FFE1B3E9" report "Aritmhetic difference 1 - Bad result" severity error;
+    assert sh_result = x"FFE1B3E9" report "Aritmhetic difference 1 - Bad sh_result" severity error;
     assert negative_flag = '1' report "Arithmetic difference 1 - Bad N flag" severity error;
     assert zero_flag = '0' report "Arithmetic difference 1 - Bad Z flag" severity error;
     operand_b <= x"0AFECAFE";
     wait for 10 ns;
-    assert result = x"00000000" report "Aritmhetic difference 2 - Bad result" severity error;
+    assert sh_result = x"00000000" report "Aritmhetic difference 2 - Bad sh_result" severity error;
     assert negative_flag = '0' report "Arithmetic difference 2 - Bad N flag" severity error;
     assert zero_flag = '1' report "Arithmetic difference 2 - Bad Z flag" severity error;
     operand_a <= x"0AE07EE7";
     wait for 10 ns;
-    assert result = x"001E4C17" report "Aritmhetic difference 3 - Bad result" severity error;
+    assert sh_result = x"001E4C17" report "Aritmhetic difference 3 - Bad sh_result" severity error;
     assert negative_flag = '0' report "Arithmetic difference 3 - Bad N flag" severity error;
     assert zero_flag = '0' report "Arithmetic difference 3 - Bad Z flag" severity error;
 
-
-    control <= "110110";
+    control <= "00110110";
     wait for 10 ns;
-    assert result = x"0AFECAFD" report "Operand B - 1 - Bad result" severity error;
+    assert sh_result = x"0AFECAFD" report "Operand B - 1 - Bad sh_result" severity error;
     assert negative_flag = '0' report "Operand B - 1 - Bad N flag" severity error;
     assert zero_flag = '0' report "Operand B - 1 - Bad Z flag" severity error;
 
     -- Other
-    control <= "010000";
+    control <= "00010000";
     wait for 10 ns;
-    assert result = x"00000000" report "Zero - Bad result" severity error;
+    assert sh_result = x"00000000" report "Zero - Bad sh_result" severity error;
     assert negative_flag = '0' report "Zero - Bad N flag" severity error;
     assert zero_flag = '1' report "Zero - Bad Z flag" severity error;
 
-    control <= "110001";
+    control <= "00110001";
     wait for 10 ns;
-    assert result = x"00000001" report "One - Bad result" severity error;
+    assert sh_result = x"00000001" report "One - Bad sh_result" severity error;
     assert negative_flag = '0' report "One - Bad N flag" severity error;
     assert zero_flag = '0' report "One - Bad Z flag" severity error;
 
-    control <= "110010";
+    control <= "00110010";
     wait for 10 ns;
-    assert result = x"FFFFFFFF" report "Negative one - Bad result" severity error;
+    assert sh_result = x"FFFFFFFF" report "Negative one - Bad sh_result" severity error;
     assert negative_flag = '1' report "Negative one - Bad N flag" severity error;
     assert zero_flag = '0' report "Negative one - Bad Z flag" severity error;
+
+    -- Shifter test
+    -- NO OP IN(31) = 0
+    control <= "00011000";
+    operand_a  <= x"7BCD7BCD";
+    wait for 10 ns;
+    assert sh_result = x"7BCD7BCD" report "No op in(31) = 0 - Bas sh_result" severity error;
+
+    -- SLL8 IN(31) = 0
+    control <= "10011000";
+    wait for 10 ns;
+    assert sh_result = x"CD7BCD00" report "Shift left in(31) = 0 - Bad sh_result" severity error;
+
+    -- SRA1 IN(31) = 0
+    control <= "01011000";
+    wait for 10 ns;
+    assert sh_result = x"3DE6BDE6" report "Shift right in(31) = 0 - Bad sh_result" severity error;
+
+    -- NO OP IN(31) = 1
+    operand_a  <= x"ABCDABCD";
+    control <= "00011000";
+    wait for 10 ns;
+    assert sh_result = x"ABCDABCD" report "No op in(31) = 1 - Bad sh_result" severity error;
+
+    -- SLL8 IN(31) = 1
+    control <= "10011000";
+    wait for 10 ns;
+    assert sh_result = x"CDABCD00" report "Shift left in(31) = 1 - Bad sh_result" severity error;
+
+    -- SRA1 IN(31) = 1
+    control <= "01011000";
+    wait for 10 ns;
+    assert sh_result = x"D5E6D5E6" report "Shift right in(31) = 1 - Bad sh_result" severity error;
 
     wait;
   end process wavegen_proc;

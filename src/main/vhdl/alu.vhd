@@ -28,12 +28,12 @@ use work.common_defs.all;
 
 --! Arithmetic logic unit based on MIC-1 ALU
 
---! The ALU operates on 2 operands (A, B); its operation is controlled by the 6
+--! The ALU operates on 2 operands (A, B); its operation is controlled by the 8
 --! control bits:
 --!
---! F_0 | F_1 | EN_A | EN_B | INV_A | INC
---!  ^                                 ^
---! MSB                               LSB
+--! SLL8 | SRA1 | F_0 | F_1 | EN_A | EN_B | INV_A | INC
+--!   ^                                              ^
+--!  MSB                                            LSB
 --!
 --! The arithmetical/logical operation is selected by the 2 MSBs (F_0, F_1):
 --!
@@ -49,6 +49,13 @@ use work.common_defs.all;
 --! The zero flag (Z) is high when all bits of the result are 0; the negative
 --! flag (N) is high when the operation is the arithmetical sum and the MSB of
 --! the result is 1.
+--!
+--! When SLL8 is high, the result of the operation is shifted left 8 bits and
+--! the 8 LSBs are zero filled; when SRA1 is high, the input is shifter right
+--! 1 bit and the MSB is sign extended; when both bits are low, the input is
+--! taken to the output unmodified; when both are high, the output is undefined.
+--!
+--! The shifted result goes to the output.
 entity alu is
   port (
     --! ALU control
@@ -58,7 +65,7 @@ entity alu is
     --! ALU operand B
     operand_b     : in  reg_data_type;
     --! ALU result
-    result        : out reg_data_type;
+    sh_result     : out reg_data_type;
     --! Negative flag
     negative_flag : out std_logic;
     --! Zero flag
@@ -69,8 +76,13 @@ end entity alu;
 --! Behavioral architecture for the ALU
 architecture behavioral of alu is
 
-  -- Aliases
-  alias fn : alu_fn_type is control(5 downto 4);
+  -- Alias
+  alias sh    : alu_sh_type is control(alu_sh_type'range);
+  alias fn    : alu_fn_type is control(alu_fn_type'range);
+  alias en_a  : std_logic is control(alu_ctrl_en_a);
+  alias en_b  : std_logic is control(alu_ctrl_en_b);
+  alias inv_a : std_logic is control(alu_ctrl_inv_a);
+  alias inc   : std_logic is control(alu_ctrl_inc);
 
   -- Signals
   signal t_operand_a     : reg_data_type;
@@ -86,12 +98,14 @@ architecture behavioral of alu is
 
 begin  -- architecture behavioral
 
-  t_operand_a     <= operand_a       when control(alu_ctrl_en_a) = '1'  else (others => '0');
-  t_operand_a_inv <= not t_operand_a when control(alu_ctrl_inv_a) = '1' else t_operand_a;
-  t_operand_b     <= operand_b       when control(alu_ctrl_en_b) = '1'  else (others => '0');
-  t_inc(0)        <= control(alu_ctrl_inc);
+  -- Inputs
+  t_operand_a     <= operand_a       when en_a = '1'  else (others => '0');
+  t_operand_a_inv <= not t_operand_a when inv_a = '1' else t_operand_a;
+  t_operand_b     <= operand_b       when en_b = '1'  else (others => '0');
+  t_inc(0)        <= inc;
   t_u_sum         <= unsigned(t_operand_a_inv) + unsigned(t_operand_b) + unsigned(t_inc);
 
+  -- ALU function
   t_and   <= t_operand_a_inv and t_operand_b when fn = alu_fn_and   else (others => '0');
   t_or    <= t_operand_a_inv or t_operand_b  when fn = alu_fn_or    else (others => '0');
   t_not_b <= not t_operand_b                 when fn = alu_fn_not_b else (others => '0');
@@ -103,8 +117,14 @@ begin  -- architecture behavioral
     t_not_b when alu_fn_not_b,
     t_sum   when others;
 
-  result        <= t_result;
+  -- ALU flags
   negative_flag <= t_sum(31);
   zero_flag     <= '1' when t_result = x"00000000" else '0';
+
+  -- Shifter
+  with sh select sh_result <=
+    t_result(23 downto 0) & x"00"        when alu_sh_sll8,
+    t_result(31) & t_result(31 downto 1) when alu_sh_sra1,
+    t_result                             when others;
 
 end architecture behavioral;

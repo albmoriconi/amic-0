@@ -14,10 +14,10 @@
 -- You should have received a copy of the GNU General Public License along with
 -- this program. If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
---! @file alu.vhd
+--! @file common_defs.vhd
 --! @author Alberto Moriconi
---! @date 2019-04-26
---! @brief Arithmetic logic unit based on MIC-1 ALU
+--! @date 2019-05-13
+--! @brief Common definitions for amic-0 design
 --------------------------------------------------------------------------------
 
 library ieee;
@@ -28,38 +28,48 @@ use ieee.std_logic_1164.all;
 --! Contains common definitions for the processor design.
 package common_defs is
 
-  -- Data width onstants
-  --! ALU control input width
-  constant alu_ctrl_width : positive := 6;
-  --! ALU function field width
-  constant alu_fn_width   : positive := 2;
+  -- Data widths
   --! Processor register data width
   constant reg_data_width : positive := 32;
+  --! ALU control input width
+  constant alu_ctrl_width : positive := 8;
 
   -- Subtypes
-  --! ALU control input
-  subtype alu_ctrl_type is std_logic_vector(alu_ctrl_width - 1 downto 0);
-  --! ALU function field
-  subtype alu_fn_type is std_logic_vector(alu_fn_width - 1 downto 0);
   --! Processor register data
   subtype reg_data_type is std_logic_vector(reg_data_width - 1 downto 0);
+  --! ALU control input
+  subtype alu_ctrl_type is std_logic_vector(alu_ctrl_width - 1 downto 0);
+  --! Shifter control input
+  subtype alu_sh_type is std_logic_vector(7 downto 6);
+  --! ALU function field
+  subtype alu_fn_type is std_logic_vector(5 downto 4);
 
-  -- Other constants
+  -- Fields
   --! ALU control EN_A bit
-  constant alu_ctrl_en_a  : natural    := 3;
+  constant alu_ctrl_en_a  : natural := 3;
   --! ALU control EN_B bit
-  constant alu_ctrl_en_b  : natural    := 2;
+  constant alu_ctrl_en_b  : natural := 2;
   --! ALU control INV_A bit
-  constant alu_ctrl_inv_a : natural    := 1;
+  constant alu_ctrl_inv_a : natural := 1;
   --! ALU control INV bit
-  constant alu_ctrl_inc   : natural    := 0;
+  constant alu_ctrl_inc   : natural := 0;
+
+  --! Constants
   --! ALU function logical AND
-  constant alu_fn_and     : alu_fn_type := "00";
+  constant alu_fn_and   : alu_fn_type := "00";
   --! ALU function logical OR
-  constant alu_fn_or      : alu_fn_type := "01";
+  constant alu_fn_or    : alu_fn_type := "01";
   --! ALU function logical NOT B
-  constant alu_fn_not_b   : alu_fn_type := "10";
+  constant alu_fn_not_b : alu_fn_type := "10";
   --! ALU function arithmetical sum
-  constant alu_fn_sum     : alu_fn_type := "11";
+  constant alu_fn_sum   : alu_fn_type := "11";
+  --! Shifter control shift left logical 8 bit
+  constant alu_sh_sll8  : alu_sh_type := "10";
+  --! Shifter control shift right arithmetical 1 bit
+  constant alu_sh_sra1  : alu_sh_type := "01";
+  --! Shifter control NOP
+  constant alu_sh_nop   : alu_sh_type := "00";
+  --! Shifter control invalid
+  constant alu_sh_err   : alu_sh_type := "11";
 
 end package common_defs;
