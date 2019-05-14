@@ -24,21 +24,16 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.common_defs.all;
+
 --! Processor control unit
 
 --! The control unit provides the control signals to the ALU based on the stored
 --! microprogram.
 --!
---! # Inputs
---! The external clock is provided to the MPC register; reset is asynchronous,
---! active high.
---!
---! The content of the MBR register and the N/Z ALU flags are provided from the
---! datapath.
---!
---! # Outputs
---! The control signals for ALU, C and B bus and memory operations are provided
---! to the datapath, based on the addressed microinstruction format.
+--! It receives the content of the MBR register and the N/Z ALU flags from the
+--! datapath and produces control signals for ALU, C and B bus and memory
+--! operations based on the addressed microinstruction format.
 entity control_unit is
   port (
     --! Clock
@@ -46,19 +41,19 @@ entity control_unit is
     --! Asynchronous active-high reset
     reset            : in  std_logic;
     --! Content of the MBR register
-    mbr_reg_out      : in  std_logic_vector(7 downto 0);
+    mbr_reg_in       : in  mbr_data_type;
     --! ALU negative flag
     alu_n_flag       : in  std_logic;
     --! ALU zero flag
     alu_z_flag       : in  std_logic;
     --! Control signals for the ALU
-    alu_control      : out std_logic_vector(7 downto 0);
+    alu_control      : out alu_ctrl_type;
     --! Control signals for the C bus
-    c_to_reg_control : out std_logic_vector(8 downto 0);
+    c_to_reg_control : out c_ctrl_type;
     --! Control signals for memory operations
-    mem_control      : out std_logic_vector(2 downto 0);
+    mem_control      : out mem_ctrl_type;
     --! Control signals for the B bus
-    reg_to_b_control : out std_logic_vector(8 downto 0)
+    reg_to_b_control : out b_ctrl_type
     );
 end entity control_unit;
 
@@ -66,16 +61,17 @@ end entity control_unit;
 architecture behavioral of control_unit is
 
   -- Registers
-  signal mpc_virtual_reg : std_logic_vector(8 downto 0);
-  signal mir_reg         : std_logic_vector(35 downto 0);
+  signal mpc_virtual_reg : ctrl_str_addr_type;
+  signal mir_reg         : ctrl_str_word_type;
   signal n_ff            : std_logic;
   signal z_ff            : std_logic;
 
   -- Signals
-  signal control_store_word   : std_logic_vector(35 downto 0);
-  signal jmpc_addr            : std_logic_vector(7 downto 0);
-  signal high_bit             : std_logic;
-  signal reg_to_b_decoder_out : std_logic_vector(8 downto 0);
+  signal control_store_word    : ctrl_str_word_type;
+  signal cntrl_nxt_addr_no_msb : mbr_data_type;
+  signal jmpc_addr             : mbr_data_type;
+  signal high_bit              : std_logic;
+  signal reg_to_b_decoder_out  : b_ctrl_type;
 
 begin  -- architecture behavioral
 
@@ -116,22 +112,23 @@ begin  -- architecture behavioral
   end process z_ff_proc;
 
   -- MPC virtual register
-  jmpc_addr <= mir_reg(34 downto 27) or mbr_reg_out when mir_reg(26) = '1' else
-               mir_reg(34 downto 27);
-  high_bit        <= (alu_n_flag and mir_reg(25)) or (alu_z_flag and mir_reg(24));
-  mpc_virtual_reg <= (mir_reg(35) or high_bit) & jmpc_addr;
+  ctrl_nxt_addr_no_msb <= mir_reg(ctrl_nxt_addr_no_msb_type'range);
+  jmpc_addr            <= ctrl_nxt_addr_no_msb or mbr_reg_out
+               when mir_reg(ctrl_jmpc) = '1' else ctrl_nxt_addr_no_msb;
+  high_bit        <= (alu_n_flag and mir_reg(ctrl_jamn)) or (alu_z_flag and mir_reg(ctrl_jamz));
+  mpc_virtual_reg <= (mir_reg(ctrl_nxt_addr_msb) or high_bit) & jmpc_addr;
 
   -- B_BUS control decoder
-  reg_to_b_decoder : process(mir_reg(3 downto 0)) is
+  reg_to_b_decoder : process(mir_reg(ctrl_b'range)) is
   begin
-    reg_to_b_decoder_out                                            <= (others => '0');
-    reg_to_b_decoder_out(to_integer(unsigned(mir_reg(3 downto 0)))) <= '1';
+    reg_to_b_decoder_out                                              <= (others => '0');
+    reg_to_b_decoder_out(to_integer(unsigned(mir_reg(ctrl_b'range)))) <= '1';
   end process reg_to_b_decoder;
 
   -- Output to datapath
-  alu_control      <= mir_reg(23 downto 16);
-  c_to_reg_control <= mir_reg(15 downto 7);
-  mem_control      <= mir_reg(6 downto 4);
+  alu_control      <= mir_reg(ctrl_alu'range);
+  c_to_reg_control <= mir_reg(ctrl_c'range);
+  mem_control      <= mir_reg(ctrl_mem'range);
   reg_to_b_control <= reg_to_b_decoder_out;
 
 end architecture behavioral;
