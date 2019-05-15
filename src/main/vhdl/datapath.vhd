@@ -73,17 +73,18 @@ end entity datapath;
 architecture structural of datapath is
 
   -- Registers
-  signal sp_reg  : reg_data_type;
-  signal lv_reg  : reg_data_type;
-  signal cpp_reg : reg_data_type;
-  signal tos_reg : reg_data_type;
-  signal opc_reg : reg_data_type;
-  signal h_reg   : reg_data_type;
-  signal mar_reg : reg_data_type;
-  signal mdr_reg : reg_data_type;
-  signal pc_reg  : reg_data_type;
-  signal mbr_reg : mbr_data_type;
-  signal rd_ff   : std_logic;
+  signal sp_reg   : reg_data_type;
+  signal lv_reg   : reg_data_type;
+  signal cpp_reg  : reg_data_type;
+  signal tos_reg  : reg_data_type;
+  signal opc_reg  : reg_data_type;
+  signal h_reg    : reg_data_type;
+  signal mar_reg  : reg_data_type;
+  signal mdr_reg  : reg_data_type;
+  signal pc_reg   : reg_data_type;
+  signal mbr_reg  : mbr_data_type;
+  signal rd_ff    : std_logic;
+  signal fetch_ff : std_logic;
 
   -- Signals
   signal a_bus : reg_data_type;
@@ -173,9 +174,9 @@ begin  -- architecture structural
 
   -- B bus MUX
   mbr_u(mbr_s_ext'range)     <= (others => '0');
-  mbr_u(mbr_data_type'range) <= mbr_data;
+  mbr_u(mbr_data_type'range) <= mbr_reg;
   mbr_s(mbr_s_ext'range)     <= (others => mbr_reg(mbr_data_type'high));
-  mbr_s(mbr_data_type'range) <= mbr_data;
+  mbr_s(mbr_data_type'range) <= mbr_reg;
 
   with reg_to_b_control select b_bus <=
     mdr_reg         when b_ctrl_mdr,
@@ -190,10 +191,10 @@ begin  -- architecture structural
     (others => '0') when others;
 
   -- Output
-  mbr_reg_out    <= mbr_register;
-  mem_data_out   <= mdr_register;
-  mem_data_addr  <= mar_register(reg_data_type'high - 2 downto 0) & "00";
+  mbr_reg_out    <= mbr_reg;
+  mem_data_out   <= mdr_reg;
+  mem_data_addr  <= mar_reg(reg_data_type'high - 2 downto 0) & "00";
   mem_data_we    <= mem_control(mem_ctrl_write);
-  mem_instr_addr <= pc_register;
+  mem_instr_addr <= pc_reg;
 
 end architecture structural;
