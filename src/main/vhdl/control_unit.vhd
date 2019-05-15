@@ -67,11 +67,11 @@ architecture behavioral of control_unit is
   signal z_ff            : std_logic;
 
   -- Signals
-  signal control_store_word    : ctrl_str_word_type;
-  signal cntrl_nxt_addr_no_msb : mbr_data_type;
-  signal jmpc_addr             : mbr_data_type;
-  signal high_bit              : std_logic;
-  signal reg_to_b_decoder_out  : b_ctrl_type;
+  signal control_store_word   : ctrl_str_word_type;
+  signal ctrl_nxt_addr_no_msb : mbr_data_type;
+  signal jmpc_addr            : mbr_data_type;
+  signal high_bit             : std_logic;
+  signal reg_to_b_decoder_out : b_ctrl_type;
 
 begin  -- architecture behavioral
 
@@ -81,39 +81,23 @@ begin  -- architecture behavioral
       address => mpc_virtual_reg,
       word    => control_store_word);
 
-  -- MIR register
+  -- Registers
   mir_reg_proc : process(clk, reset) is
   begin
     if reset = '1' then
-      mir_reg <= (others => '0');
+      mir_reg <= "000000001000000000000000000000001001";  -- Entry point may change in future versions
+      n_ff    <= '0';
+      z_ff    <= '0';
     elsif rising_edge(clk) then
       mir_reg <= control_store_word;
+      n_ff    <= alu_n_flag;
+      z_ff    <= alu_z_flag;
     end if;
   end process mir_reg_proc;
 
-  -- N flag flip-flop
-  n_ff_proc : process(clk, reset) is
-  begin
-    if reset = '1' then
-      n_ff <= '0';
-    elsif rising_edge(clk) then
-      n_ff <= alu_n_flag;
-    end if;
-  end process n_ff_proc;
-
-  -- Z flag flip-flop
-  z_ff_proc : process(clk, reset) is
-  begin
-    if reset = '1' then
-      z_ff <= '0';
-    elsif rising_edge(clk) then
-      z_ff <= alu_z_flag;
-    end if;
-  end process z_ff_proc;
-
   -- MPC virtual register
   ctrl_nxt_addr_no_msb <= mir_reg(ctrl_nxt_addr_no_msb_type'range);
-  jmpc_addr            <= ctrl_nxt_addr_no_msb or mbr_reg_out
+  jmpc_addr            <= ctrl_nxt_addr_no_msb or mbr_reg_in
                when mir_reg(ctrl_jmpc) = '1' else ctrl_nxt_addr_no_msb;
   high_bit        <= (alu_n_flag and mir_reg(ctrl_jamn)) or (alu_z_flag and mir_reg(ctrl_jamz));
   mpc_virtual_reg <= (mir_reg(ctrl_nxt_addr_msb) or high_bit) & jmpc_addr;
@@ -121,8 +105,11 @@ begin  -- architecture behavioral
   -- B_BUS control decoder
   reg_to_b_decoder : process(mir_reg(ctrl_b'range)) is
   begin
-    reg_to_b_decoder_out                                              <= (others => '0');
-    reg_to_b_decoder_out(to_integer(unsigned(mir_reg(ctrl_b'range)))) <= '1';
+    reg_to_b_decoder_out <= (others => '0');
+
+    if unsigned(mir_reg(ctrl_b'range)) < b_ctrl_width then
+      reg_to_b_decoder_out(to_integer(unsigned(mir_reg(ctrl_b'range)))) <= '1';
+    end if;
   end process reg_to_b_decoder;
 
   -- Output to datapath

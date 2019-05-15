@@ -36,11 +36,11 @@ package common_defs is
   --! ALU control width
   constant alu_ctrl_width      : positive := 8;
   --! C bus control width
-  constant c_ctrl_width        : positive := 8;
+  constant c_ctrl_width        : positive := 9;
   --! Memory control width
   constant mem_ctrl_width      : positive := 3;
   --! B bus control width
-  constant b_ctrl_width        : positive := 4;
+  constant b_ctrl_width        : positive := 9;
   --! Control store address width
   constant ctrl_str_addr_width : positive := 9;
   --! Control store word width
