@@ -2,7 +2,5 @@ add_vhdl_sources(common_defs.vhd
   alu.vhd
   control_unit.vhd
   processor.vhd
-  basic_register.vhd
   datapath.vhd
-  control_store.vhd
-  memory_interface.vhd)
+  control_store.vhd)

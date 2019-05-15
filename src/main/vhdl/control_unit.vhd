@@ -38,7 +38,7 @@ entity control_unit is
   port (
     --! Clock
     clk              : in  std_logic;
-    --! Asynchronous active-high reset
+    --! Synchronous active-high reset
     reset            : in  std_logic;
     --! Content of the MBR register
     mbr_reg_in       : in  mbr_data_type;
@@ -82,18 +82,20 @@ begin  -- architecture behavioral
       word    => control_store_word);
 
   -- Registers
-  mir_reg_proc : process(clk, reset) is
+  reg_proc : process(clk, reset) is
   begin
-    if reset = '1' then
-      mir_reg <= "000000001000000000000000000000001001";  -- Entry point may change in future versions
-      n_ff    <= '0';
-      z_ff    <= '0';
-    elsif rising_edge(clk) then
-      mir_reg <= control_store_word;
-      n_ff    <= alu_n_flag;
-      z_ff    <= alu_z_flag;
+    if rising_edge(clk) then
+      if reset = '1' then
+        mir_reg <= "000000001000000000000000000000001001";  -- Entry point may change in future versions
+        n_ff    <= '0';
+        z_ff    <= '0';
+      else
+        mir_reg <= control_store_word;
+        n_ff    <= alu_n_flag;
+        z_ff    <= alu_z_flag;
+      end if;
     end if;
-  end process mir_reg_proc;
+  end process reg_proc;
 
   -- MPC virtual register
   ctrl_nxt_addr_no_msb <= mir_reg(ctrl_nxt_addr_no_msb_type'range);

@@ -81,6 +81,8 @@ package common_defs is
   subtype ctrl_mem is std_logic_vector(6 downto 4);
   --! Control store word B bus field
   subtype ctrl_b is std_logic_vector(3 downto 0);
+  --! MBR signed extension range
+  subtype mbr_s_ext is std_logic_vector(reg_data_width - 1 downto mbr_data_width);
 
   -- Types
   --! Control store content
@@ -103,6 +105,30 @@ package common_defs is
   constant ctrl_jamn         : natural := 25;
   --! Control store word JAMZ bit
   constant ctrl_jamz         : natural := 24;
+  --! C control MAR bit
+  constant c_ctrl_mar        : natural := 0;
+  --! C control MDR bit
+  constant c_ctrl_mdr        : natural := 1;
+  --! C control PC bit
+  constant c_ctrl_pc         : natural := 2;
+  --! C control SP bit
+  constant c_ctrl_sp         : natural := 3;
+  --! C control LV bit
+  constant c_ctrl_lv         : natural := 4;
+  --! C control CPP bit
+  constant c_ctrl_cpp        : natural := 5;
+  --! C control TOS bit
+  constant c_ctrl_tos        : natural := 6;
+  --! C control OPX bit
+  constant c_ctrl_opc        : natural := 7;
+  --! C control H bit
+  constant c_ctrl_h          : natural := 8;
+  --! Memory control fetch bit
+  constant mem_ctrl_fetch    : natural := 0;
+  --! Memory control read bit
+  constant mem_ctrl_read     : natural := 1;
+  --! Memory control write bit
+  constant mem_ctrl_write    : natural := 2;
 
   --! Constants
   --! ALU function logical AND
@@ -121,5 +147,23 @@ package common_defs is
   constant alu_sh_nop   : alu_sh_type := "00";
   --! Shifter control invalid
   constant alu_sh_err   : alu_sh_type := "11";
+  --! B control MDR mask
+  constant b_ctrl_mdr   : b_ctrl_type := "000000001";
+  --! B control PC mask
+  constant b_ctrl_pc    : b_ctrl_type := "000000010";
+  --! B control MBR mask
+  constant b_ctrl_mbr   : b_ctrl_type := "000000100";
+  --! B control MBRU mask
+  constant b_ctrl_mbru  : b_ctrl_type := "000001000";
+  --! B control SP mask
+  constant b_ctrl_sp    : b_ctrl_type := "000010000";
+  --! B control LV mask
+  constant b_ctrl_lv    : b_ctrl_type := "000100000";
+  --! B control CPP mask
+  constant b_ctrl_cpp   : b_ctrl_type := "001000000";
+  --! B control TOS mask
+  constant b_ctrl_tos   : b_ctrl_type := "010000000";
+  --! B control OPC mask
+  constant b_ctrl_opc   : b_ctrl_type := "100000000";
 
 end package common_defs;
