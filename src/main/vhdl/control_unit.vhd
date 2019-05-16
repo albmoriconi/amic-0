@@ -82,7 +82,7 @@ begin  -- architecture behavioral
       word    => control_store_word);
 
   -- Registers
-  reg_proc : process(clk, reset) is
+  reg_proc : process(clk) is
   begin
     if rising_edge(clk) then
       if reset = '1' then

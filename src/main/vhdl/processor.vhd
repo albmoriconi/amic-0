@@ -23,29 +23,29 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
+use work.common_defs.all;
+
 --! The amic-0 processor
 
---! # Inputs
---!
---! The external clock is provided to datapath and control unit registers.
---! Reset is asynchronous, high low.
---!
---! # Bidirectional ports
---! The datapath has a 32 bit bidirectional port for memory data read/write
---! (including fetch).
---!
---! # Outputs
---! The datapath provides the memory address for memory operations.
+--! The processor exposes the memory interface defined in the datapath.
 entity processor is
   port (
     --! Clock
-    clk         : in    std_logic;
-    --! Asynchronous active-high reset
-    reset       : in    std_logic;
-    --! Bidirectional port for memory data read/write
-    mem_data    : inout std_logic_vector(31 downto 0);
-    --! Memory address for memory operations
-    mem_address : out   std_logic_vector(31 downto 0)
+    clk            : in  std_logic;
+    --! Synchronous active-high reset
+    reset          : in  std_logic;
+    --! Memory data write enable
+    mem_data_we    : out std_logic;
+    --! Port for memory data read
+    mem_data_in    : in  reg_data_type;
+    --! Port for memory data write
+    mem_data_out   : out reg_data_type;
+    --! Memory address for memory data operations
+    mem_data_addr  : out reg_data_type;
+    --! Port for memory instruction read
+    mem_instr_in   : in  mbr_data_type;
+    --! Memory address for memory instruction fetch
+    mem_instr_addr : out reg_data_type
     );
 end entity processor;
 
@@ -53,11 +53,11 @@ end entity processor;
 architecture structural of processor is
 
   -- Signals
-  signal alu_control_t      : std_logic_vector(7 downto 0);
-  signal c_to_reg_control_t : std_logic_vector(8 downto 0);
-  signal reg_to_b_control_t : std_logic_vector(8 downto 0);
-  signal mem_control_t      : std_logic_vector(2 downto 0);
-  signal mbr_reg_out_t      : std_logic_vector(7 downto 0);
+  signal alu_control_t      : reg_data_type;
+  signal c_to_reg_control_t : reg_data_type;
+  signal reg_to_b_control_t : reg_data_type;
+  signal mem_control_t      : reg_data_type;
+  signal mbr_reg_t          : mbr_data_type;
   signal alu_n_flag_t       : std_logic;
   signal alu_z_flag_t       : std_logic;
 
@@ -68,7 +68,7 @@ begin  -- architecture structural
     port map (
       clk              => clk,
       reset            => reset,
-      mbr_reg_out      => mbr_reg_out_t,
+      mbr_reg_in       => mbr_reg_t,
       alu_n_flag       => alu_n_flag_t,
       alu_z_flag       => alu_z_flag_t,
       alu_control      => alu_control_t,
@@ -85,10 +85,14 @@ begin  -- architecture structural
       c_to_reg_control => c_to_reg_control_t,
       mem_control      => mem_control_t,
       reg_to_b_control => reg_to_b_control_t,
-      mbr_reg_out      => mbr_reg_out_t,
-      mem_data         => mem_data,
-      mem_address      => mem_address,
+      mbr_reg_out      => mbr_reg_t,
       alu_n_flag       => alu_n_flag_t,
-      alu_z_flag       => alu_z_flag_t);
+      alu_z_flag       => alu_z_flag_t,
+      mem_data_we      => mem_data_we,
+      mem_data_in      => mem_data_in,
+      mem_data_out     => mem_data_out,
+      mem_data_addr    => mem_data_addr,
+      mem_instr_in     => mem_instr_in,
+      mem_instr_addr   => mem_instr_addr);
 
 end architecture structural;

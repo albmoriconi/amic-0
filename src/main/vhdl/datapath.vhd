@@ -64,7 +64,7 @@ entity datapath is
     mem_data_addr    : out reg_data_type;
     --! Port for memory instruction read
     mem_instr_in     : in  mbr_data_type;
-    --! Memory address for memory instruction read
+    --! Memory address for memory instruction fetch
     mem_instr_addr   : out reg_data_type
     );
 end entity datapath;
@@ -107,7 +107,7 @@ begin  -- architecture structural
       zero_flag     => alu_z_flag);
 
   -- Processor registers
-  reg_proc : process(clk, reset) is
+  reg_proc : process(clk) is
   begin
     if rising_edge(clk) then
       if reset = '1' then
