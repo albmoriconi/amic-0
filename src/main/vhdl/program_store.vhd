@@ -44,6 +44,7 @@ architecture dataflow of program_store is
   -- Constants
   constant words : prog_str_type := (
 --BEGIN_WORDS_ENTRY
+    others => (others => '0')
 --END_WORDS_ENTRY
     );
 
