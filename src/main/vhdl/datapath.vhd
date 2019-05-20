@@ -85,6 +85,7 @@ architecture structural of datapath is
   signal mbr_reg  : mbr_data_type;
   signal rd_ff    : std_logic;
   signal fetch_ff : std_logic;
+  signal wr_ff    : std_logic;
 
   -- Signals
   signal a_bus : reg_data_type;
@@ -111,8 +112,8 @@ begin  -- architecture structural
   begin
     if rising_edge(clk) then
       if reset = '1' then
-        sp_reg  <= (others => '0');
-        lv_reg  <= (others => '0');
+        sp_reg  <= x"00000101";
+        lv_reg  <= x"00000100";
         cpp_reg <= (others => '0');
         tos_reg <= (others => '0');
         opc_reg <= (others => '0');
@@ -124,6 +125,7 @@ begin  -- architecture structural
 
         rd_ff    <= '0';
         fetch_ff <= '0';
+        wr_ff    <= '0';
       else
         if c_to_reg_control(c_ctrl_mar) = '1' then
           mar_reg <= c_bus;
@@ -137,9 +139,6 @@ begin  -- architecture structural
         if c_to_reg_control(c_ctrl_lv) = '1' then
           lv_reg <= c_bus;
         end if;
-        if c_to_reg_control(c_ctrl_cpp) = '1' then
-          cpp_reg <= c_bus;
-        end if;
         if c_to_reg_control(c_ctrl_tos) = '1' then
           tos_reg <= c_bus;
         end if;
@@ -148,6 +147,9 @@ begin  -- architecture structural
         end if;
         if c_to_reg_control(c_ctrl_h) = '1' then
           h_reg <= c_bus;
+        end if;
+        if c_to_reg_control(c_ctrl_opc) = '1' then
+          opc_reg <= c_bus;
         end if;
 
         -- MDR can also receive data from memory
@@ -165,6 +167,7 @@ begin  -- architecture structural
         -- Effects on regs on next clock cycle
         rd_ff    <= mem_control(mem_ctrl_read);
         fetch_ff <= mem_control(mem_ctrl_fetch);
+        wr_ff    <= mem_control(mem_ctrl_write);
       end if;
     end if;
   end process reg_proc;
@@ -194,7 +197,7 @@ begin  -- architecture structural
   mbr_reg_out    <= mbr_reg;
   mem_data_out   <= mdr_reg;
   mem_data_addr  <= mar_reg(reg_data_type'high - 2 downto 0) & "00";
-  mem_data_we    <= mem_control(mem_ctrl_write);
+  mem_data_we    <= wr_ff;
   mem_instr_addr <= pc_reg;
 
 end architecture structural;

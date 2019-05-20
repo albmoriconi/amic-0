@@ -41,14 +41,14 @@ entity data_memory is
     --! Port for memory read
     data_out : out reg_data_type;
     --! Address for memory operations
-    address  : out reg_data_type
+    address  : in reg_data_type
     );
 end entity data_memory;
 
 --! Dataflow architecture for the control store
 architecture behavioral of data_memory is
 
-  signal mem : mem_data_type;
+  signal mem : data_mem_type;
 
 begin  -- architecture dataflow
 
@@ -57,11 +57,25 @@ begin  -- architecture dataflow
     if (rising_edge(clk)) then
       if (we = '1') then
         mem(to_integer(unsigned(address))) <= data_in;
-        data_out                           <= data_in;
-      else
-        data_out <= mem(to_integer(unsigned(address)));
       end if;
     end if;
+  end process;
+
+  mem_read_proc : process(address) is
+  begin
+    -- BEGIN_FAKE_CONSTANT
+    if (address = x"00000000") then
+      data_out <= x"00000000";
+    elsif (address = x"00000004") then
+      data_out <= x"00000056";
+    elsif (address = x"00000008") then
+      data_out <= x"00000003";
+    elsif (address = x"0000000C") then
+      data_out <= x"00000022";
+    else
+      data_out <= mem(to_integer(unsigned(address)));
+    end if;
+    -- END_FAKE_CONSTANT
   end process;
 
 end architecture behavioral;

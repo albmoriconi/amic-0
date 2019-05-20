@@ -50,7 +50,7 @@ package common_defs is
   --! Program store size
   constant prog_str_words      : positive := 512;
   --! Data memory size
-  constant data_mem_words      : positive := 512;
+  constant data_mem_words      : positive := 1152;
 
   -- Subtypes
   --! Processor register data
@@ -92,7 +92,7 @@ package common_defs is
   --! Control store content
   type ctrl_str_type is array (ctrl_str_words - 1 downto 0) of ctrl_str_word_type;
   --! Program store content
-  type prog_str_type is array (prog_str_words - 1 downto 0) of reg_data_type;
+  type prog_str_type is array (prog_str_words - 1 downto 0) of mbr_data_type;
   --! Data memory content
   type data_mem_type is array (data_mem_words - 1 downto 0) of reg_data_type;
 

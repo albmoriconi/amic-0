@@ -53,10 +53,10 @@ end entity processor;
 architecture structural of processor is
 
   -- Signals
-  signal alu_control_t      : reg_data_type;
-  signal c_to_reg_control_t : reg_data_type;
-  signal reg_to_b_control_t : reg_data_type;
-  signal mem_control_t      : reg_data_type;
+  signal alu_control_t      : alu_ctrl_type;
+  signal c_to_reg_control_t : c_ctrl_type;
+  signal reg_to_b_control_t : b_ctrl_type;
+  signal mem_control_t      : mem_ctrl_type;
   signal mbr_reg_t          : mbr_data_type;
   signal alu_n_flag_t       : std_logic;
   signal alu_z_flag_t       : std_logic;
