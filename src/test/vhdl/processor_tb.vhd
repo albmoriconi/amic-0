@@ -1,36 +1,56 @@
+--------------------------------------------------------------------------VHDL--
+-- Copyright (C) 2019 Alberto Moriconi
+--
+-- This program is free software: you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation, either version 3 of the License, or (at your option) any later
+-- version.
+--
+-- This program is distributed in the hope that it will be useful, but WITHOUT
+-- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+-- FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+-- details.
+--
+-- You should have received a copy of the GNU General Public License along with
+-- this program. If not, see <http://www.gnu.org/licenses/>.
+--------------------------------------------------------------------------------
+--! @file processor_tb.vhd
+--! @author Alberto Moriconi
+--! @date 2019-05-19
+--! @brief Testbench for the processor
+---------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 
 use work.common_defs.all;
 
--------------------------------------------------------------------------------
-
+--! Empty entity for the testbench
 entity processor_tb is
-
 end entity processor_tb;
 
--------------------------------------------------------------------------------
-
+--! Behavioral architecture for the testbench
 architecture behavioral of processor_tb is
 
-  -- component ports
+  -- Component ports
   signal reset          : std_logic;
   signal mem_data_we    : std_logic;
   signal mem_data_in    : reg_data_type;
   signal mem_data_out   : reg_data_type;
   signal mem_data_addr  : reg_data_type;
-  signal mem_instr_in   : mbr_data_type;
+  signal mem_instr_in   : reg_data_type;
   signal mem_instr_addr : reg_data_type;
 
-  -- clock
+  -- Clock
   signal clk : std_logic := '1';
 
+  -- Variables
   shared variable end_run : boolean := false;
 
 begin  -- architecture behavioral
 
-  -- component instantiation
-  DUT: entity work.processor
+  -- Component instantiation
+  dut : entity work.processor
     port map (
       clk            => clk,
       reset          => reset,
@@ -38,23 +58,22 @@ begin  -- architecture behavioral
       mem_data_in    => mem_data_in,
       mem_data_out   => mem_data_out,
       mem_data_addr  => mem_data_addr,
-      mem_instr_in   => mem_instr_in,
+      mem_instr_in   => mem_instr_in(31 downto 24),
       mem_instr_addr => mem_instr_addr);
 
-  program_store_1: entity work.program_store
+  dp_ar_ram : entity work.dp_ar_ram
     port map (
-      address => mem_instr_addr,
-      word    => mem_instr_in);
+      clk        => clk,
+      we_1       => mem_data_we,
+      data_in_1  => mem_data_out,
+      data_out_1 => mem_data_in,
+      address_1  => mem_data_addr,
+      we_2       => '0',
+      data_in_2  => (others => '0'),
+      data_out_2 => mem_instr_in,
+      address_2  => mem_instr_addr);
 
-  data_memory_1: entity work.data_memory
-    port map (
-      clk      => clk,
-      we       => mem_data_we,
-      data_in  => mem_data_out,
-      data_out => mem_data_in,
-      address  => mem_data_addr);
-
-  -- clock generation
+  -- Clock generation
   clk_proc : process
   begin
     while end_run = false loop
@@ -65,11 +84,10 @@ begin  -- architecture behavioral
     wait;
   end process clk_proc;
 
-  -- waveform generation
-  WaveGen_Proc: process
+  -- Waveform generation
+  wavegen_proc: process
   begin
-    -- insert signal assignments here
-    wait until Clk = '1';
+    wait until clk = '1';
     wait for 2 ns;
 
     reset <= '1';
@@ -79,15 +97,6 @@ begin  -- architecture behavioral
     wait until mem_instr_addr = x"00000021";
     end_run := true;
     wait;
-  end process WaveGen_Proc;
+  end process wavegen_proc;
 
 end architecture behavioral;
-
--------------------------------------------------------------------------------
-
-configuration processor_tb_behavioral_cfg of processor_tb is
-  for behavioral
-  end for;
-end processor_tb_behavioral_cfg;
-
--------------------------------------------------------------------------------

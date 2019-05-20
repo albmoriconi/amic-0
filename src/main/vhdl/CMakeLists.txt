@@ -4,5 +4,4 @@ add_vhdl_sources(common_defs.vhd
   processor.vhd
   datapath.vhd
   control_store.vhd
-  program_store.vhd
-  data_memory.vhd)
+  dp_ar_ram.vhd)

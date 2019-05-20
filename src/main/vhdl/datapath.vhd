@@ -114,7 +114,7 @@ begin  -- architecture structural
       if reset = '1' then
         sp_reg  <= x"00000101";
         lv_reg  <= x"00000100";
-        cpp_reg <= (others => '0');
+        cpp_reg <= x"00000080";
         tos_reg <= (others => '0');
         opc_reg <= (others => '0');
         h_reg   <= (others => '0');
