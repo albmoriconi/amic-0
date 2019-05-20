@@ -94,6 +94,9 @@ begin  -- architecture behavioral
     wait for 10 ns;
     reset <= '0';
 
+    wait until mem_instr_addr = x"0000001D" and mem_data_we = '1';
+    assert mem_data_out = x"00000068" report "Bad calculated value" severity failure;
+
     wait until mem_instr_addr = x"00000021";
     end_run := true;
     wait;

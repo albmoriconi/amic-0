@@ -31,9 +31,12 @@ if __name__ == '__main__':
             if line.strip() == '--BEGIN_WORDS_ENTRY':
                 in_tags = True
                 for word in words:
-                    word_entry = str(idx) + ' => "' + word.strip() + '",\n'
-                    idx += 1
-                    hdl_f.write(word_entry)
+                    if word.startswith("@"):
+                        idx = int(word[1:])
+                    else:
+                        word_entry = str(idx) + ' => "' + word.strip() + '",\n'
+                        idx += 1
+                        hdl_f.write(word_entry)
                 hdl_f.write("others => (others => '0')\n")
             elif line.strip() == '--END_WORDS_ENTRY':
                 in_tags = False
