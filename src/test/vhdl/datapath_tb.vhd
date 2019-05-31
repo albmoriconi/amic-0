@@ -119,7 +119,7 @@ begin  -- architecture behavioral
     wait for 10 ns;
     -- Check MAR and MDR out
     assert mem_data_out = x"15DF49E5" report "MDR out - Bad value" severity failure;
-    assert mem_data_addr = x"577D2794" report "MAR out - Bad value" severity failure;
+    assert mem_data_addr = x"15DF49E5" report "MAR out - Bad value" severity failure;
 
     -- Take MBR (sign extended) to PC
     c_to_reg_control <= "000000100";

@@ -14,26 +14,34 @@
 -- You should have received a copy of the GNU General Public License along with
 -- this program. If not, see <http://www.gnu.org/licenses/>.
 --------------------------------------------------------------------------------
---! @file processor_tb.vhd
+--! @file system.vhd
 --! @author Alberto Moriconi
---! @date 2019-05-19
---! @brief Testbench for the processor
----------------------------------------------------------------------------------
+--! @date 2019-05-32
+--! @brief A sample system based on amic-0
+--------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
 
 use work.common_defs.all;
 
---! Empty entity for the testbench
-entity processor_tb is
-end entity processor_tb;
+--! A sample system based on amic-0
 
---! Behavioral architecture for the testbench
-architecture behavioral of processor_tb is
+--! The system contains the processor and a RAM
+entity system is
+  port (
+    --! Clock
+    clk            : in  std_logic;
+    --! Synchronous active-high reset
+    reset    : in  std_logic;
+    --! Memory data output
+    data_out : out reg_data_type
+    );
+end entity system;
 
-  -- Component ports
-  signal reset          : std_logic;
+-- Structural architecture for the system
+architecture structural of system is
+
   signal mem_data_we    : std_logic;
   signal mem_data_in    : reg_data_type;
   signal mem_data_out   : reg_data_type;
@@ -41,16 +49,10 @@ architecture behavioral of processor_tb is
   signal mem_instr_in   : mbr_data_type;
   signal mem_instr_addr : reg_data_type;
 
-  -- Clock
-  signal clk : std_logic := '1';
+begin -- architecture structural
 
-  -- Variables
-  shared variable end_run : boolean := false;
-
-begin  -- architecture behavioral
-
-  -- Component instantiation
-  dut : entity work.processor
+  -- Processor instantiation
+  processor : entity work.processor
     port map (
       clk            => clk,
       reset          => reset,
@@ -61,6 +63,7 @@ begin  -- architecture behavioral
       mem_instr_in   => mem_instr_in,
       mem_instr_addr => mem_instr_addr);
 
+  -- RAM instantiation
   dp_ar_ram : entity work.dp_ar_ram
     port map (
       clk        => clk,
@@ -73,33 +76,7 @@ begin  -- architecture behavioral
       data_out_2 => mem_instr_in,
       address_2  => mem_instr_addr);
 
-  -- Clock generation
-  clk_proc : process
-  begin
-    while end_run = false loop
-      clk <= not clk;
-      wait for 5 ns;
-    end loop;
+  -- Output
+  data_out <= mem_data_out;
 
-    wait;
-  end process clk_proc;
-
-  -- Waveform generation
-  wavegen_proc: process
-  begin
-    wait until clk = '1';
-    wait for 2 ns;
-
-    reset <= '1';
-    wait for 10 ns;
-    reset <= '0';
-
-    wait until mem_instr_addr = x"0000001D" and mem_data_we = '1';
-    assert mem_data_out = x"00000068" report "Bad calculated value" severity failure;
-
-    wait until mem_instr_addr = x"00000021";
-    end_run := true;
-    wait;
-  end process wavegen_proc;
-
-end architecture behavioral;
+end architecture structural;

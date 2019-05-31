@@ -46,7 +46,7 @@ entity dp_ar_ram is
     --! Port for memory write 2
     data_in_2  : in  reg_data_type;
     --! Port for memory read 2
-    data_out_2 : out reg_data_type;
+    data_out_2 : out mbr_data_type;
     --! Address for memory operations 2
     address_2  : in  reg_data_type
     );
@@ -56,110 +56,59 @@ end entity dp_ar_ram;
 architecture behavioral of dp_ar_ram is
 
   -- Signals
-  signal t_address_1 : integer := 0;
-  signal t_address_2 : integer := 0;
+  signal t_address_1  : integer := 0;
+  signal t_address_2  : integer := 0;
+  signal wa_address_2 : reg_data_type;
+  signal t_data_out_2 : reg_data_type;
 
   -- RAM content
   signal mem : dp_ar_ram_type := (
 --BEGIN_WORDS_ENTRY
-512 => "00000000",
-513 => "00000000",
-514 => "00000000",
-515 => "00000000",
-516 => "00000000",
-517 => "00000000",
-518 => "00000000",
-519 => "01010110",
-520 => "00000000",
-521 => "00000000",
-522 => "00000000",
-523 => "00000011",
-524 => "00000000",
-525 => "00000000",
-526 => "00000000",
-527 => "00100010",
-0 => "00000000",
-1 => "00000001",
-2 => "00000000",
-3 => "00000010",
-4 => "00010000",
-5 => "01010110",
-6 => "00110110",
-7 => "00000001",
-8 => "00100000",
-9 => "00000000",
-10 => "00000001",
-11 => "00010101",
-12 => "00000001",
-13 => "10100001",
-14 => "00000000",
-15 => "00000110",
-16 => "10100111",
-17 => "00000000",
-18 => "00001111",
-19 => "00010000",
-20 => "00000000",
-21 => "00010101",
-22 => "00000001",
-23 => "00100000",
-24 => "00000000",
-25 => "00000010",
-26 => "10111001",
-27 => "00000000",
-28 => "00000011",
-29 => "00110110",
-30 => "00000010",
-31 => "10100111",
-32 => "00000000",
-33 => "00000000",
-34 => "00000000",
-35 => "00000011",
-36 => "00000000",
-37 => "00000000",
-38 => "00010101",
-39 => "00000001",
-40 => "00010101",
-41 => "00000010",
-42 => "00010000",
-43 => "00001111",
-44 => "01100101",
-45 => "01100101",
-46 => "10101101",
+128 => "00000000000000000000000000000000",
+129 => "00000000000000000000000001010110",
+130 => "00000000000000000000000000000011",
+131 => "00000000000000000000000000100010",
+0 => "00000010000000000000000100000000",
+1 => "00000001001101100101011000010000",
+2 => "00010101000000010000000000100000",
+3 => "00000110000000001010000100000001",
+4 => "00010000000011110000000010100111",
+5 => "00100000000000010001010100000000",
+6 => "00000000101110010000001000000000",
+7 => "10100111000000100011011000000011",
+8 => "00000011000000000000000000000000",
+9 => "00000001000101010000000000000000",
+10 => "00001111000100000000001000010101",
+11 => "00000000101011010110010101100101",
 others => (others => '0')
 --END_WORDS_ENTRY
-);
+    );
 
 begin  -- architecture behavioral
 
+  wa_address_2 <= "00" & address_2(reg_data_type'high downto 2);
   t_address_1 <= to_integer(unsigned(address_1));
-  t_address_2 <= to_integer(unsigned(address_2));
+  t_address_2 <= to_integer(unsigned(wa_address_2));
 
   mem_proc : process(clk) is
   begin
     if (rising_edge(clk)) then
       if (we_1 = '1') then
-        mem(t_address_1) <= data_in_1(31 downto 24);
-        mem(t_address_1 + 1) <= data_in_1(23 downto 16);
-        mem(t_address_1 + 2) <= data_in_1(15 downto 8);
-        mem(t_address_1 + 3) <= data_in_1(7 downto 0);
-      end if;
-      if (we_2 = '1') then
-        mem(t_address_2) <= data_in_2(31 downto 24);
-        mem(t_address_2 + 1) <= data_in_2(23 downto 16);
-        mem(t_address_2 + 2) <= data_in_2(15 downto 8);
-        mem(t_address_2 + 3) <= data_in_2(7 downto 0);
+        mem(t_address_1) <= data_in_1;
+      elsif (we_2 = '1') then
+        mem(t_address_2) <= data_in_2;
       end if;
     end if;
   end process;
 
-  data_out_1(31 downto 24) <= mem(t_address_1);
-  data_out_1(23 downto 16) <= mem(t_address_1 + 1);
-  data_out_1(15 downto 8) <= mem(t_address_1 + 2);
-  data_out_1(7 downto 0) <= mem(t_address_1 + 3);
+  data_out_1   <= mem(t_address_1);
+  t_data_out_2 <= mem(t_address_2);
 
-  data_out_2(31 downto 24) <= mem(t_address_2);
-  data_out_2(23 downto 16) <= mem(t_address_2 + 1);
-  data_out_2(15 downto 8) <= mem(t_address_2 + 2);
-  data_out_2(7 downto 0) <= mem(t_address_2 + 3);
+  with address_2(1 downto 0) select data_out_2 <=
+    t_data_out_2(7 downto 0)   when "00",
+    t_data_out_2(15 downto 8)  when "01",
+    t_data_out_2(23 downto 16) when "10",
+    t_data_out_2(31 downto 24) when "11",
+    (others => '0')            when others;
 
 end architecture behavioral;

@@ -47,8 +47,8 @@ package common_defs is
   constant ctrl_str_word_width : positive := 36;
   --! Control store size
   constant ctrl_str_words      : positive := 512;
-  --! RAM size in bytes (8 KB)
-  constant dp_ar_ram_size      : positive := 8192;
+  --! RAM size in 32 bit words (16 KB)
+  constant dp_ar_ram_size      : positive := 512;
 
   -- Subtypes
   --! Processor register data
@@ -90,7 +90,7 @@ package common_defs is
   --! Control store content
   type ctrl_str_type is array (ctrl_str_words - 1 downto 0) of ctrl_str_word_type;
   --! RAM content
-  type dp_ar_ram_type is array (dp_ar_ram_size - 1 downto 0) of mbr_data_type;
+  type dp_ar_ram_type is array (dp_ar_ram_size - 1 downto 0) of reg_data_type;
 
   -- Fields
   --! ALU control EN_A bit

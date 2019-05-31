@@ -70,7 +70,7 @@ entity datapath is
 end entity datapath;
 
 --! Structural architecture for the datapath
-architecture structural of datapath is
+architecture behavioral of datapath is
 
   -- Registers
   signal sp_reg   : reg_data_type;
@@ -196,8 +196,8 @@ begin  -- architecture structural
   -- Output
   mbr_reg_out    <= mbr_reg;
   mem_data_out   <= mdr_reg;
-  mem_data_addr  <= mar_reg(reg_data_type'high - 2 downto 0) & "00";
+  mem_data_addr  <= mar_reg;
   mem_data_we    <= wr_ff;
   mem_instr_addr <= pc_reg;
 
-end architecture structural;
+end architecture behavioral;
