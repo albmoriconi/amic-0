@@ -179,7 +179,12 @@ gstore = 0xD0:
        MAR = MDR; goto istore_cont
 
 gload = 0xDC:
-      goto main
+      PC = PC + 1; fetch
+      H = MBRU << 8
+      H = MBRU OR H
+      MAR = H + CPP; rd
+      empty
+      MAR = MDR; goto iload_cont
 
 mic1_exit:
         halt
