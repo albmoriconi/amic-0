@@ -1,32 +1,18 @@
   .constant
-  r 0x56
-  fake_pi 3
+  d_reg 0x200
+  f_reg 0x204
+  c_reg 0x208
+  d 0x2FAF080
+  f 0x5F5E100
+  c 0x1
   .endconstant
 
   .main
-  .var
-  a
-  b
-  .endvar
-  BIPUSH 0x56
-  ISTORE a
-  LDC_W r
-  ILOAD a
-  IF_ICMPEQ l1
-  GOTO l2
-l1: BIPUSH 0x0 # Fake OBJREF
-  ILOAD a
-  LDC_W fake_pi
-  INVOKEVIRTUAL .sumstuff
-  ISTORE b
-l2: HALT
-  .endmethod
-
-  .sumstuff(a, b)
-  ILOAD a
-  ILOAD b
-  BIPUSH 0xF
-  IADD
-  IADD
-  IRETURN
+  LDC_W d
+  GSTORE d_reg
+  LDC_W f
+  GSTORE f_reg
+  LDC_W c
+  GSTORE c_reg
+  HALT
   .endmethod

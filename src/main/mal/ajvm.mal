@@ -170,5 +170,16 @@ ireturn = 0xAD:
         MDR = TOS; wr
         Z = PC - 1; if (Z) goto mic1_exit; else goto main
 
+gstore = 0xD0:
+       PC = PC + 1; fetch
+       H = MBRU << 8
+       H = MBRU OR H
+       MAR = H + CPP; rd
+       empty
+       MAR = MDR; goto istore_cont
+
+gload = 0xDC:
+      goto main
+
 mic1_exit:
         halt

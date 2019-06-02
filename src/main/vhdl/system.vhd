@@ -16,7 +16,7 @@
 --------------------------------------------------------------------------------
 --! @file system.vhd
 --! @author Alberto Moriconi
---! @date 2019-05-32
+--! @date 2019-05-31
 --! @brief A sample system based on amic-0
 --------------------------------------------------------------------------------
 
@@ -27,39 +27,47 @@ use work.common_defs.all;
 
 --! A sample system based on amic-0
 
---! The system contains the processor and a RAM
+--! The system contains the processor, a RAM and a PWM generator
 entity system is
   port (
     --! Clock
-    clk            : in  std_logic;
+    clk   : in  std_logic;
     --! Synchronous active-high reset
-    reset    : in  std_logic;
+    reset : in  std_logic;
     --! Memory data output
-    data_out : out reg_data_type
+    pulse : out std_logic
     );
 end entity system;
 
 -- Structural architecture for the system
 architecture structural of system is
 
+  signal proc_data_we   : std_logic;
+  signal proc_data_in   : reg_data_type;
+  signal proc_data_out  : reg_data_type;
+  signal proc_data_addr : reg_data_type;
   signal mem_data_we    : std_logic;
   signal mem_data_in    : reg_data_type;
   signal mem_data_out   : reg_data_type;
   signal mem_data_addr  : reg_data_type;
   signal mem_instr_in   : mbr_data_type;
   signal mem_instr_addr : reg_data_type;
+  signal pwm_data_we    : std_logic;
+  signal pwm_data_in    : reg_data_type;
+  signal pwm_data_out   : reg_data_type;
+  signal pwm_data_addr  : reg_data_type;
 
-begin -- architecture structural
+begin  -- architecture structural
 
   -- Processor instantiation
   processor : entity work.processor
     port map (
       clk            => clk,
       reset          => reset,
-      mem_data_we    => mem_data_we,
-      mem_data_in    => mem_data_in,
-      mem_data_out   => mem_data_out,
-      mem_data_addr  => mem_data_addr,
+      mem_data_we    => proc_data_we,
+      mem_data_in    => proc_data_in,
+      mem_data_out   => proc_data_out,
+      mem_data_addr  => proc_data_addr,
       mem_instr_in   => mem_instr_in,
       mem_instr_addr => mem_instr_addr);
 
@@ -68,15 +76,52 @@ begin -- architecture structural
     port map (
       clk        => clk,
       we_1       => mem_data_we,
-      data_in_1  => mem_data_out,
-      data_out_1 => mem_data_in,
+      data_in_1  => mem_data_in,
+      data_out_1 => mem_data_out,
       address_1  => mem_data_addr,
       we_2       => '0',
       data_in_2  => (others => '0'),
       data_out_2 => mem_instr_in,
       address_2  => mem_instr_addr);
 
-  -- Output
-  data_out <= mem_data_out;
+  -- PWM instantiation
+  pwm : entity work.pwm
+    port map (
+      clk      => clk,
+      reset    => reset,
+      regwrite => pwm_data_we,
+      address  => pwm_data_addr(3 downto 0),
+      data_in  => pwm_data_in,
+      data_out => pwm_data_out,
+      pulse    => pulse);
+
+  -- Device multiplexing
+  with proc_data_addr(9) select mem_data_we <=
+    proc_data_we when '0',
+    '0'          when others;
+
+  with proc_data_addr(9) select mem_data_in <=
+    proc_data_out   when '0',
+    (others => '0') when others;
+
+  with proc_data_addr(9) select mem_data_addr <=
+    proc_data_addr  when '0',
+    (others => '0') when others;
+
+  with proc_data_addr(9) select pwm_data_we <=
+    proc_data_we when '1',
+    '0'          when others;
+
+  with proc_data_addr(9) select pwm_data_in <=
+    proc_data_out   when '1',
+    (others => '0') when others;
+
+  with proc_data_addr(9) select pwm_data_addr <=
+    proc_data_addr  when '1',
+    (others => '0') when others;
+
+  with proc_data_addr(9) select proc_data_in <=
+    mem_data_out when '0',
+    pwm_data_out when others;
 
 end architecture structural;
