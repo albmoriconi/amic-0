@@ -6,4 +6,5 @@ add_vhdl_sources(common_defs.vhd
   control_store.vhd
   dp_ar_ram.vhd
   system.vhd
-  pwm.vhd)
+  pwm.vhd
+  device_mux.vhd)

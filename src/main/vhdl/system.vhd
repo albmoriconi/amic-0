@@ -95,33 +95,19 @@ begin  -- architecture structural
       data_out => pwm_data_out,
       pulse    => pulse);
 
-  -- Device multiplexing
-  with proc_data_addr(9) select mem_data_we <=
-    proc_data_we when '0',
-    '0'          when others;
-
-  with proc_data_addr(9) select mem_data_in <=
-    proc_data_out   when '0',
-    (others => '0') when others;
-
-  with proc_data_addr(9) select mem_data_addr <=
-    proc_data_addr  when '0',
-    (others => '0') when others;
-
-  with proc_data_addr(9) select pwm_data_we <=
-    proc_data_we when '1',
-    '0'          when others;
-
-  with proc_data_addr(9) select pwm_data_in <=
-    proc_data_out   when '1',
-    (others => '0') when others;
-
-  with proc_data_addr(9) select pwm_data_addr <=
-    proc_data_addr  when '1',
-    (others => '0') when others;
-
-  with proc_data_addr(9) select proc_data_in <=
-    mem_data_out when '0',
-    pwm_data_out when others;
-
+  -- Device MUX instantiation
+  device_mux: entity work.device_mux
+    port map (
+      proc_data_we   => proc_data_we,
+      proc_data_out  => proc_data_out,
+      proc_data_addr => proc_data_addr,
+      mem_data_out   => mem_data_out,
+      pwm_data_out   => pwm_data_out,
+      proc_data_in   => proc_data_in,
+      mem_data_we    => mem_data_we,
+      mem_data_in    => mem_data_in,
+      mem_data_addr  => mem_data_addr,
+      pwm_data_we    => pwm_data_we,
+      pwm_data_in    => pwm_data_in,
+      pwm_data_addr  => pwm_data_addr);
 end architecture structural;
