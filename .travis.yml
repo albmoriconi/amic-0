@@ -1,5 +1,7 @@
 language: minimal
 
+dist: trusty
+
 install:
   - sudo add-apt-repository ppa:pgavin/ghdl -y
   - sudo apt-get update
