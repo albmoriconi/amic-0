@@ -118,7 +118,7 @@ begin  -- architecture behavioral
     t_sum   when others;
 
   -- ALU flags
-  negative_flag <= t_sum(31);
+  negative_flag <= t_result(31);
   zero_flag     <= '1' when t_result = x"00000000" else '0';
 
   -- Shifter
