@@ -61,26 +61,26 @@ begin  -- architecture behavioral
     operand_b <= x"BAE07EE7";
     wait for 10 ns;
     assert sh_result = x"8AE04AE6" report "Logical AND - Bad sh_result" severity failure;
-    assert negative_flag = '0' report "Logical AND - Bad N flag" severity failure;
+    assert negative_flag = '1' report "Logical AND - Bad N flag" severity failure;
     assert zero_flag = '0' report "Logical AND - Bad Z flag" severity failure;
 
     -- OR function
     control <= "00011100";
     wait for 10 ns;
     assert sh_result = x"FAFEFEFF" report "Logical OR - Bad sh_result" severity failure;
-    assert negative_flag = '0' report "Logical OR - Bad N flag" severity failure;
+    assert negative_flag = '1' report "Logical OR - Bad N flag" severity failure;
     assert zero_flag = '0' report "Logical OR - Bad Z flag" severity failure;
 
     control <= "00011000";
     wait for 10 ns;
     assert sh_result = x"CAFECAFE" report "Operand A - Bad sh_result" severity failure;
-    assert negative_flag = '0' report "Operand A - Bad N flag" severity failure;
+    assert negative_flag = '1' report "Operand A - Bad N flag" severity failure;
     assert zero_flag = '0' report "Operand A - Bad Z flag" severity failure;
 
     control <= "00010100";
     wait for 10 ns;
     assert sh_result = x"BAE07EE7" report "Operand B - Bad sh_result" severity failure;
-    assert negative_flag = '0' report "Operand B - Bad N flag" severity failure;
+    assert negative_flag = '1' report "Operand B - Bad N flag" severity failure;
     assert zero_flag = '0' report "Operand B - Bad Z flag" severity failure;
 
     control <= "00011010";
